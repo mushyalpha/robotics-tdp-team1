@@ -205,3 +205,74 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+
+# Webots
+.*.wbproj
+*.cache
+
+# Choregraphe
+*.crg.autosave
+*.pml
+
+# NAOqi
+*.pyc
+naoqi_logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Large files (add specific large assets)
+*.mp4
+*.avi
+large_datasets/
+*.mov
+*.mkv
+*.zip
+*.tar.gz
+*.rar
+
+# Webots specific
+webots_simulation/controllers/*/*.exe
+webots_simulation/controllers/*/*.dll
+*.wbproj
+
+# Choregraphe specific  
+*.xar
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+
+# Project specific
+.cursor/
+supervisor_meeting*.md
+!supervisor_meeting1.md

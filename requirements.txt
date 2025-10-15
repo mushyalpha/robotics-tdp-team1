@@ -1,0 +1,22 @@
+# Computer Vision
+opencv-python>=4.5.0
+numpy>=1.21.0
+scipy>=1.7.0
+
+# Webots (if available via pip)
+# Note: Webots itself is installed separately
+
+# NAOqi Python SDK
+# Note: Install from Aldebaran website separately
+
+# Utilities
+pyyaml>=5.4
+matplotlib>=3.4.0
+
+# Testing
+pytest>=6.2.0
+pytest-cov>=2.12.0
+
+# Optional: Machine Learning
+# tensorflow>=2.5.0
+# torch>=1.9.0

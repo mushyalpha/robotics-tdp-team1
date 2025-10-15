@@ -1,0 +1,124 @@
+# NAO6 Robot Parameters Configuration
+
+robot:
+  model: NAO6
+  version: 1.0
+  height: 0.58  # meters
+  weight: 5.48  # kg
+  
+joints:
+  # Joint limits in radians
+  head:
+    HeadYaw:
+      min: -2.0857
+      max: 2.0857
+    HeadPitch:
+      min: -0.6720
+      max: 0.5149
+      
+  arms:
+    left:
+      LShoulderPitch:
+        min: -2.0857
+        max: 2.0857
+      LShoulderRoll:
+        min: -0.3142
+        max: 1.3265
+      LElbowYaw:
+        min: -2.0857
+        max: 2.0857
+      LElbowRoll:
+        min: -1.5446
+        max: -0.0349
+        
+    right:
+      RShoulderPitch:
+        min: -2.0857
+        max: 2.0857
+      RShoulderRoll:
+        min: -1.3265
+        max: 0.3142
+      RElbowYaw:
+        min: -2.0857
+        max: 2.0857
+      RElbowRoll:
+        min: 0.0349
+        max: 1.5446
+        
+  legs:
+    left:
+      LHipYawPitch:
+        min: -1.1453
+        max: 0.7405
+      LHipRoll:
+        min: -0.3794
+        max: 0.7904
+      LHipPitch:
+        min: -1.5358
+        max: 0.4840
+      LKneePitch:
+        min: -0.0923
+        max: 2.1125
+      LAnklePitch:
+        min: -1.1894
+        max: 0.9227
+      LAnkleRoll:
+        min: -0.3978
+        max: 0.7690
+        
+    right:
+      RHipYawPitch:
+        min: -1.1453
+        max: 0.7405
+      RHipRoll:
+        min: -0.7904
+        max: 0.3794
+      RHipPitch:
+        min: -1.5358
+        max: 0.4840
+      RKneePitch:
+        min: -0.0923
+        max: 2.1125
+      RAnklePitch:
+        min: -1.1894
+        max: 0.9227
+      RAnkleRoll:
+        min: -0.7690
+        max: 0.3978
+
+motion:
+  walk:
+    max_forward_speed: 0.5  # m/s
+    max_lateral_speed: 0.3  # m/s
+    max_angular_speed: 1.0  # rad/s
+    step_height: 0.02  # meters
+    step_period: 0.5  # seconds
+    
+  kick:
+    max_power: 1.0
+    min_power: 0.1
+    accuracy: 15  # degrees
+    
+  balance:
+    com_height: 0.33  # Center of mass height in meters
+    support_polygon_margin: 0.02  # Safety margin in meters
+    
+sensors:
+  camera:
+    top:
+      resolution: [640, 480]
+      fov: 60.97  # degrees
+      fps: 30
+    bottom:
+      resolution: [640, 480]
+      fov: 47.64  # degrees
+      fps: 30
+      
+  imu:
+    accelerometer_range: 2  # g
+    gyroscope_range: 500  # deg/s
+    
+  force_sensors:
+    feet:
+      max_force: 100  # N
+      resolution: 0.1  # N

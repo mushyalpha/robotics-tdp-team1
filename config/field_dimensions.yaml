@@ -1,0 +1,100 @@
+# RoboCup Humanoid League KidSize Field Dimensions
+
+field:
+  # Main field dimensions
+  length: 9.0  # meters (along X axis)
+  width: 6.0   # meters (along Y axis)
+  
+  # Field markings
+  center_circle:
+    radius: 0.75  # meters
+    
+  # Goal dimensions
+  goal:
+    width: 2.6    # meters
+    depth: 0.6    # meters  
+    height: 1.2   # meters
+    post_diameter: 0.1  # meters
+    
+  # Goal area (small box)
+  goal_area:
+    length: 1.0  # meters (from goal line)
+    width: 3.0   # meters
+    
+  # Penalty area (large box)
+  penalty_area:
+    length: 2.0  # meters (from goal line)
+    width: 5.0   # meters
+    
+  # Penalty mark
+  penalty_mark:
+    distance: 1.5  # meters from goal line
+    diameter: 0.1  # meters
+    
+  # Line specifications
+  lines:
+    width: 0.05  # meters
+    color: white
+    
+  # Border area
+  border:
+    width: 1.0  # meters around field
+    
+# Ball specifications
+ball:
+  diameter: 0.14  # meters (FIFA Size 1)
+  circumference: 0.45  # meters
+  weight: 0.205  # kg
+  colors: ["orange", "white"]  # Allowed colors
+  
+# Robot zones (for initial positioning)
+zones:
+  # Team 1 (negative X side)
+  team1:
+    goalkeeper:
+      x: -4.0
+      y: 0.0
+    defender:
+      x: -2.5
+      y: 0.0
+    attacker1:
+      x: -1.0
+      y: 1.5
+    attacker2:
+      x: -1.0
+      y: -1.5
+      
+  # Team 2 (positive X side)
+  team2:
+    goalkeeper:
+      x: 4.0
+      y: 0.0
+    defender:
+      x: 2.5
+      y: 0.0
+    attacker1:
+      x: 1.0
+      y: 1.5
+    attacker2:
+      x: 1.0
+      y: -1.5
+      
+# Game states
+game_states:
+  - initial
+  - ready
+  - set
+  - playing
+  - finished
+  - penalized
+  
+# Referee commands
+referee_commands:
+  - kickoff
+  - freekick
+  - goalkick
+  - throwin
+  - corner
+  - penalty
+  - goal
+  - out_of_bounds
