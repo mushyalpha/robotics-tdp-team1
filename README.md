@@ -70,7 +70,7 @@ git push origin feature/wp3-motion-control
 # Create Pull Request on GitHub for review
 ```
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 robotics-tdp-team1/
@@ -114,24 +114,7 @@ pytest --cov=src tests/
 - User Guides: `docs/user_guides/`
 - GitHub Guide: `docs/user_guides/github_guide.md`
 
-## Key Deliverables
-
-### Simulation Phase (Oct 2025 - Feb 2026)
-
-- [ ] Webots simulation environment with pitch and ball
-- [ ] NAO6 robot models with basic locomotion
-- [ ] Behavioral algorithms for goalkeeper, defender, attacker
-- [ ] Design Review Presentation (Week of Feb 2, 2026)
-
-### Hardware Phase (Feb 2026 - Apr 2026)
-
-- [ ] Transfer algorithms to physical NAO6 robots
-- [ ] Hardware system tests
-- [ ] Field tests on physical pitch
-- [ ] Final Presentation (Week of Mar 23, 2026)
-- [ ] Final Report (Submit: Apr 20-24, 2026)
-
-## 🤝 Contributing
+## Contributing
 
 See `docs/CONTRIBUTING.md` for:
 
