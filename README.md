@@ -2,15 +2,16 @@
 
 **University of Glasgow - James Watt School of Engineering**
 **Robotics Team Design Project M (ENG5325)**
-**Cyberphysical RoboCup Soccer Teams**
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.8+
-- Webots R2023b+ (download from [cyberbotics.com](https://cyberbotics.com/))
-- Git
+Python 3.8+
+
+Webots R2023b+ (download from [cyberbotics.com](https://cyberbotics.com/))
+
+Git
 
 ### Installation
 
