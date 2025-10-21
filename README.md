@@ -176,6 +176,8 @@ pytest --cov=src tests/
 - **Project Plan:** `docs/project_plan.md`
 - **Requirements:** `docs/requirements.md`
 - **Meeting Notes:** `docs/meeting_notes/`
+- **Development Log:** `docs/development_log.md` *(daily entries required)*
+- **Work Package Logs:** `docs/wp_logs/` *(detailed technical logs)*
 
 ## Contributing
 
@@ -205,6 +207,47 @@ pytest --cov=src tests/
 - **WP4 (Zefu):** Modular behaviors, state machines, decision logic
 - **WP5 (Chengjie):** Hardware compatibility, deployment docs
 - **WP6 (Jinghao):** Test coverage, procedures, metrics
+
+## Development Logging
+
+### Simplified Logging Process
+**Team members:** Maintain your individual WP log weekly  
+**Technical Lead (Bonolo):** Consolidates key progress into main development log
+
+### Your Responsibility: WP Log Only
+**Each team member maintains:** `docs/wp_logs/wp[X]_[name]_log.md`
+
+**Update weekly with:**
+- What you accomplished this week
+- Technical decisions and why you made them
+- Test results and metrics
+- Any blockers or issues
+- Dependencies on other WPs
+- Commits/PRs for traceability
+
+**Example WP Log Entry:**
+```
+#### Week 2 (Oct 21-27, 2025)
+- Implemented PID balance controller with Kp=1.2, Ki=0.1, Kd=0.05
+- Fixed ankle joint oscillation by adjusting damping parameters
+- Tested walking on flat surface - 90% success rate
+- Blocker: Need IMU calibration data from hardware team
+- Next: Test on slopes, integrate with motion controller
+- Related: commit abc123f, PR #15
+```
+
+### Technical Lead Responsibility
+**Bonolo reviews all WP logs weekly and:**
+- Consolidates key progress into main `docs/development_log.md`
+- Tracks project-wide dependencies and blockers
+- Prepares progress summaries for reporting
+- Coordinates between work packages
+
+### Why This Approach Works
+- **Less overhead:** One log per person vs daily entries
+- **Better quality:** Weekly reflection vs rushed daily notes
+- **Centralized view:** Technical lead sees full project picture
+- **Report ready:** Consolidated information for final report
 
 ## 🔗 Useful Links
 
