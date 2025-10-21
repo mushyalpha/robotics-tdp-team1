@@ -7,33 +7,68 @@
 
 ### Prerequisites
 
-Python 3.8+
-
-Webots R2023b+ (download from [cyberbotics.com](https://cyberbotics.com/))
-
-Git
+- **Python 3.8+**
+- **Git**
+- **Webots R2023b+** (download from [cyberbotics.com](https://cyberbotics.com/))
 
 ### Installation
 
-1. **Clone the repository:**
+#### 1. Clone the Repository
 
-   ```bash
-   git clone https://github.com/mushyalpha/robotics-tdp-team1.git
-   cd robotics-tdp-team1
-   ```
-2. **Install Python dependencies:**
+```bash
+git clone https://github.com/mushyalpha/robotics-tdp-team1.git
+cd robotics-tdp-team1
+```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. **Install Webots:**
+#### 2. Install Python Dependencies
 
-   - Download from: https://cyberbotics.com/
-   - Install and add to PATH
-4. **Install NAOqi SDK (for hardware phase):**
+**Windows:**
+```bash
+pip install -r requirements.txt
+```
 
-   - Download from Aldebaran/SoftBank Robotics
-   - Follow installation guide in `docs/user_guides/naoqi_setup.md`
+**Linux/Mac:**
+```bash
+pip3 install -r requirements.txt
+# or use virtual environment (recommended)
+python3 -m venv venv
+source venv/bin/activate  # Linux/Mac
+pip install -r requirements.txt
+```
+
+#### 3. Install Webots
+
+**Windows:**
+- Download from: https://cyberbotics.com/
+- Run installer and add to PATH
+
+**Linux (Ubuntu/Debian):**
+```bash
+# Download .deb package from cyberbotics.com
+sudo dpkg -i webots_2023b_amd64.deb
+sudo apt-get install -f  # Fix dependencies if needed
+```
+
+**Mac:**
+```bash
+# Download .dmg from cyberbotics.com and install
+# Or use Homebrew:
+brew install --cask webots
+```
+
+#### 4. Install NAOqi SDK (for hardware phase)
+- Download from Aldebaran/SoftBank Robotics
+- Follow installation guide in `docs/user_guides/naoqi_setup.md`
+
+### Webots Simulation Setup
+
+**Important:** We use a **shared simulation environment** that gets updated collaboratively:
+
+1. **Main simulation files** are in `webots_simulation/worlds/`
+2. **Jie Shu (WP2)** maintains the master simulation files
+3. **Always pull latest changes** before working on simulation
+4. **Don't modify world files directly** - create feature branches for simulation changes
+5. **Coordinate with WP2** before making major simulation changes
 
 ### Running Simulation
 
@@ -43,33 +78,62 @@ Git
 # Run simulation
 ```
 
-## Development Workflow
+## Git Workflow
 
-### Branch Structure
+### First Time Setup
 
-- `main` - Stable releases only (protected)
-- `develop` - Integration branch
-- `feature/wp[X]-description` - Feature branches for each work package
+1. **Install Git:** Download from [git-scm.com](https://git-scm.com/) (Windows) or use package manager (Linux/Mac)
+2. **Configure Git:**
+   ```bash
+   git config --global user.name "Your Name"
+   git config --global user.email "firstname.lastname@glasgow.ac.uk"
+   ```
+3. **Clone repository:**
+   ```bash
+   git clone https://github.com/mushyalpha/robotics-tdp-team1.git
+   cd robotics-tdp-team1
+   ```
 
-### For Each Work Package
+### Essential Commands
 
-**Example for WP3 (Guidance & Control):**
+| Task | Command |
+|------|---------|
+| Check status | `git status` |
+| Stage changes | `git add .` |
+| Commit | `git commit -m "WP[X]: Brief description"` |
+| Push | `git push origin branch-name` |
+| Pull latest | `git pull origin develop` |
+| Create branch | `git checkout -b feature/wp[X]-description` |
+| Switch branch | `git checkout branch-name` |
+
+### Daily Team Workflow
 
 ```bash
-# Create your feature branch
-git checkout -b feature/wp3-motion-control
+# 1. Start with latest changes
+git checkout develop
+git pull origin develop
 
-# Work on your code in src/wp3_guidance_control/
+# 2. Create your feature branch  
+git checkout -b feature/wp[X]-your-feature
 
-# Commit regularly
+# 3. Work on your code, then commit
 git add .
-git commit -m "WP3: Implemented PID controller for walking"
+git commit -m "WP[X]: What you implemented"
 
-# Push to GitHub
-git push origin feature/wp3-motion-control
-
-# Create Pull Request on GitHub for review
+# 4. Push and create Pull Request on GitHub
+git push origin feature/wp[X]-your-feature
 ```
+
+### Branch Rules
+- **`main`** - Protected, stable releases only
+- **`develop`** - Integration branch, pull from here daily
+- **`feature/wp[X]-description`** - Your work branches
+- **Never commit directly to main/develop!**
+
+### 📚 Need More Help?
+- **Comprehensive Guide:** [GitHub's Git Handbook](https://guides.github.com/introduction/git-handbook/)
+- **Interactive Tutorial:** [Learn Git Branching](https://learngitbranching.js.org/)
+- **Git Cheat Sheet:** [GitHub's Git Cheat Sheet](https://education.github.com/git-cheat-sheet-education.pdf)
 
 ## Project Structure
 
@@ -109,20 +173,38 @@ pytest --cov=src tests/
 
 ## Documentation
 
-- Project Plan: `docs/project_plan.md`
-- Requirements: `docs/requirements.md`
-- Meeting Notes: `docs/meeting_notes/`
-- User Guides: `docs/user_guides/`
-- GitHub Guide: `docs/user_guides/github_guide.md`
+- **Project Plan:** `docs/project_plan.md`
+- **Requirements:** `docs/requirements.md`
+- **Meeting Notes:** `docs/meeting_notes/`
 
 ## Contributing
 
-See `docs/CONTRIBUTING.md` for:
+### Coding Standards
+- **Python:** Follow PEP 8, max 100 chars/line, 4 spaces (no tabs)
+- **Naming:** `PascalCase` for classes, `snake_case` for functions, `UPPER_SNAKE_CASE` for constants
+- **Docstrings:** Use Google style for all public functions/classes
+- **Comments:** Explain *why*, not *what*
 
-- Coding standards
-- Git workflow
-- Testing requirements
-- Code review process
+### Pull Request Rules
+1. **Create feature branch:** `feature/wp[X]-description`
+2. **Write tests** for new features (aim for 70% coverage)
+3. **Update documentation** if needed
+4. **Get at least 1 review** before merging
+5. **No direct commits** to main/develop
+
+### Code Review Checklist
+- [ ] Code follows style guide
+- [ ] Tests pass and coverage adequate
+- [ ] Documentation updated
+- [ ] No obvious bugs or security issues
+- [ ] Performance acceptable
+
+### Work Package Responsibilities
+- **WP2 (Jie Shu):** Simulation accuracy, world configs, performance
+- **WP3 (Bonolo):** Control stability, clear APIs, safety
+- **WP4 (Zefu):** Modular behaviors, state machines, decision logic
+- **WP5 (Chengjie):** Hardware compatibility, deployment docs
+- **WP6 (Jinghao):** Test coverage, procedures, metrics
 
 ## 🔗 Useful Links
 
