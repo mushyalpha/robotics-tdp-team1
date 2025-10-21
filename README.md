@@ -149,7 +149,7 @@ robotics-tdp-team1/
 │   └── plugins/             # Custom plugins
 ├── src/                     # Source code
 │   ├── wp3_guidance_control/# Low-level control algorithms
-│   ├── wp4_behavioral/      # High-level behaviors
+│   ├── wp4_behavioral/      # High-level behaviours
 │   ├── vision/              # Computer vision modules
 │   └── utils/               # Utility functions
 ├── tests/                   # Test suite
@@ -204,7 +204,7 @@ pytest --cov=src tests/
 ### Work Package Responsibilities
 - **WP2 (Jie Shu):** Simulation accuracy, world configs, performance
 - **WP3 (Bonolo):** Control stability, clear APIs, safety
-- **WP4 (Zefu):** Modular behaviors, state machines, decision logic
+- **WP4 (Zefu):** Modular behaviours, state machines, decision logic
 - **WP5 (Chengjie):** Hardware compatibility, deployment docs
 - **WP6 (Jinghao):** Test coverage, procedures, metrics
 

@@ -48,7 +48,7 @@
 **Target:** Functional motion and ball control
 
 - [ ] PID controller implementation
-- [ ] Walking gait optimization
+- [ ] Walking gait optimisation
 - [ ] Kick algorithm development
 - [ ] Vision integration
 
@@ -56,7 +56,7 @@
 **Target:** System integration and testing
 
 - [ ] Hardware integration
-- [ ] Performance optimization
+- [ ] Performance optimisation
 - [ ] System testing
 
 ### Phase 4: Validation (Weeks 13-16)

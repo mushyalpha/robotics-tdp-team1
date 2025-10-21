@@ -6,7 +6,7 @@ following RoboCup Humanoid League specifications.
 
 Modules:
     wp3_guidance_control: Low-level motion control and guidance
-    wp4_behavioral: High-level behavioral algorithms  
+    wp4_behavioral: High-level behavioural algorithms  
     vision: Computer vision and object detection
     utils: Utility functions and helpers
 """

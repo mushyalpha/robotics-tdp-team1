@@ -5,9 +5,9 @@
 **Duration:** October 2025 - February 2026
 
 ## Objectives
-- Create basic behavioral algorithm to allow robot operation
-- Develop custom behaviors for Goalkeeper, Defender, Attackers
-- Optimize tactical behavior
+- Create basic behavioural algorithm to allow robot operation
+- Develop custom behaviours for Goalkeeper, Defender, Attackers
+- Optimise tactical behaviour
 - Test algorithms in simulation
 
 ## Technical Requirements
@@ -51,13 +51,13 @@
 
 ## Training Results
 
-### Goalkeeper Behavior
+### Goalkeeper Behaviour
 *Add training metrics and performance here*
 
-### Defender Behavior
+### Defender Behaviour
 *Add training metrics and performance here*
 
-### Attacker Behavior
+### Attacker Behaviour
 *Add training metrics and performance here*
 
 ---
@@ -95,8 +95,8 @@
 - **WP6:** Testing scenarios and validation metrics
 
 ### Providing to Other WPs
-- **WP5:** Trained behavior models for hardware deployment
-- **WP6:** Behavior specifications for testing
+- **WP5:** Trained behaviour models for hardware deployment
+- **WP6:** Behaviour specifications for testing
 
 ---
 

@@ -27,7 +27,7 @@ The project is organized into six individual work packages (WPs) spanning the fu
 **WP Team:** Everyone!
 
 ### Key Tasks:
-- Handles all non-technical project tasks (scheduling, task and time management, meeting organization, etc.)
+- Handles all non-technical project tasks (scheduling, task and time management, meeting organisation, etc.)
 - Handles communication with supervisor and manager
 - Lead requirements definition
 
@@ -74,13 +74,13 @@ Full simulation environment containing:
 **WP Team:** Jinghao Wang
 
 ### Key Tasks:
-- Create basic behavioral algorithm to allow robot operation
-- Develop custom behaviors for Goalkeeper, Defender, Attackers
-- Optimize tactical behavior
+- Create basic behavioural algorithm to allow robot operation
+- Develop custom behaviours for Goalkeeper, Defender, Attackers
+- Optimise tactical behaviour
 - Test algorithms in simulation
 
 ### Deliverables:
-High Level Behavioral Algorithms for:
+High Level Behavioural Algorithms for:
 - Goalkeeper
 - Defender
 - Attacker
@@ -93,7 +93,7 @@ High Level Behavioral Algorithms for:
 
 ### Key Tasks:
 - Implementation of environment sensing hardware control
-- Transfer of software (guidance and control, behavioral algorithms) to hardware
+- Transfer of software (guidance and control, behavioural algorithms) to hardware
 - Support for field test and final field test
 
 ### Deliverables:

@@ -5,7 +5,7 @@
 **Duration:** October 2025 - March 2026
 
 ## Objectives
-- Handle all non-technical project tasks (scheduling, task management, meeting organization)
+- Handle all non-technical project tasks (scheduling, task management, meeting organisation)
 - Handle communication with supervisor and manager
 - Lead requirements definition
 - Coordinate between work packages

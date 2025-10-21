@@ -34,7 +34,7 @@ field:
   # Line specifications
   lines:
     width: 0.05  # meters
-    color: white
+    colour: white
     
   # Border area
   border:
@@ -45,7 +45,7 @@ ball:
   diameter: 0.14  # meters (FIFA Size 1)
   circumference: 0.45  # meters
   weight: 0.205  # kg
-  colors: ["orange", "white"]  # Allowed colors
+  colours: ["orange", "white"]  # Allowed colours
   
 # Robot zones (for initial positioning)
 zones:

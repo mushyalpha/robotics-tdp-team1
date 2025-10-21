@@ -61,7 +61,7 @@
 - [ ] **Jie:** Research Webots setup and NAO6 models
 - [ ] **Ciarán:** Create detailed Gantt chart
 - [ ] **All:** Install Webots and Python environment
-- [ ] **Zefu:** Research behavioral algorithms for soccer robots
+- [ ] **Zefu:** Research behavioural algorithms for soccer robots
 - [ ] **Chengjie:** Investigate NAOqi SDK installation
 - [ ] **Jinghao:** Draft initial test plan template
 

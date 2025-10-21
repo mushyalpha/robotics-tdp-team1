@@ -6,7 +6,7 @@
 
 ## Objectives
 - Implementation of environment sensing hardware control
-- Transfer of software (guidance and control, behavioral algorithms) to hardware
+- Transfer of software (guidance and control, behavioural algorithms) to hardware
 - Support for field test and final field test
 - Integration of all work packages into functioning robot teams
 
@@ -94,7 +94,7 @@
 ### Dependencies on Other WPs
 - **WP2:** Validated simulation for comparison
 - **WP3:** Control software ready for hardware
-- **WP4:** Trained behavioral models
+- **WP4:** Trained behavioural models
 - **WP6:** Testing procedures and validation criteria
 
 ### Providing to Other WPs
