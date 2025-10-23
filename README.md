@@ -237,7 +237,7 @@ git branch
 - **Keep only active work** - if it's merged, delete it
 - **Use descriptive names** so you remember what branches were for
 
-### 🛠️ Recommended VS Code Extensions
+### Recommended VS Code Extensions
 
 **Essential for this project:**
 
@@ -273,7 +273,7 @@ oderwat.indent-rainbow
 
 **Quick install:** `Ctrl+Shift+P` → "Extensions: Install Extensions" → paste IDs above
 
-### 📚 Need More Help?
+### Need More Help?
 
 - **Comprehensive Guide:** [GitHub&#39;s Git Handbook](https://guides.github.com/introduction/git-handbook/)
 - **Interactive Tutorial:** [Learn Git Branching](https://learngitbranching.js.org/)
