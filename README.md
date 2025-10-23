@@ -61,11 +61,6 @@ sudo apt-get install -f  # Fix dependencies if needed
 brew install --cask webots
 ```
 
-#### 4. Install NAOqi SDK (for hardware phase)
-
-- Download from Aldebaran/SoftBank Robotics
-- Follow installation guide in `docs/user_guides/naoqi_setup.md`
-
 ### Webots Simulation Setup
 
 **Important:** We use a **shared simulation environment** that gets updated collaboratively:
@@ -143,7 +138,7 @@ git push origin feature/wp[X]-your-feature
 - **`feature/wp[X]-description`** - Your work branches
 - **Never commit directly to main/develop!**
 
-### 🚨 Common Git Issues
+### Common Git Issues
 
 **"I have uncommitted changes and need to switch branches":**
 
@@ -184,7 +179,65 @@ git checkout your-feature-branch
 git merge develop
 ```
 
-### 🛠️ Recommended VS Code Extensions
+### Branch Cleanup & Management
+
+**What Happens as You Work:**
+As you create more feature branches, your local Git will accumulate old branches:
+
+```bash
+git branch  # Shows all your local branches
+* develop
+  feature/wp3-balance-controller     # Merged but still local
+  feature/wp3-kick-algorithm        # Merged but still local  
+  feature/wp3-walking-gait          # Merged but still local
+  feature/wp3-vision-integration    # Currently working on
+```
+
+**GitHub Auto-Delete vs Local Cleanup:**
+
+- **GitHub automatically deletes** remote branches after PR merge
+- **Local branches remain** on your computer until you delete them
+
+**Weekly Cleanup Workflow:**
+
+```bash
+# 1. Switch to develop and update
+git checkout develop
+git pull origin develop
+
+# 2. See which branches are safe to delete (already merged)
+git branch --merged develop
+
+# 3. Delete merged local branches (excludes develop/main)
+git branch --merged develop | grep -v develop | grep -v main | xargs git branch -d
+
+# 4. Clean up remote tracking references
+git remote prune origin
+
+# 5. Check your clean branch list
+git branch -v
+```
+
+**Manual Cleanup (Alternative):**
+
+```bash
+# Delete specific merged branch
+git branch -d feature/wp3-balance-controller
+
+# Force delete if Git complains (but you know it's merged)
+git branch -D feature/wp3-old-experiment
+
+# Check what's left
+git branch
+```
+
+**Keep Your Workspace Clean:**
+
+- **Delete branches immediately** after PR merge
+- **Keep only active work** - if it's merged, delete it
+- **Use descriptive names** so you remember what branches were for
+
+### Recommended VS Code Extensions
 
 **Essential for this project:**
 
@@ -220,7 +273,7 @@ oderwat.indent-rainbow
 
 **Quick install:** `Ctrl+Shift+P` → "Extensions: Install Extensions" → paste IDs above
 
-### 📚 Need More Help?
+### Need More Help?
 
 - **Comprehensive Guide:** [GitHub&#39;s Git Handbook](https://guides.github.com/introduction/git-handbook/)
 - **Interactive Tutorial:** [Learn Git Branching](https://learngitbranching.js.org/)
@@ -282,10 +335,9 @@ pytest --cov=src tests/
 ### Pull Request Rules
 
 1. **Create feature branch:** `feature/wp[X]-description`
-2. **Write tests** for new features (aim for 70% coverage)
-3. **Update documentation** if needed
-4. **Get at least 1 review** before merging
-5. **No direct commits** to main/develop
+2. **Update documentation** if needed
+3. **Get at least 1 review** before merging
+4. **No direct commits** to main/develop
 
 ### Code Review Checklist
 
