@@ -23,11 +23,13 @@ cd robotics-tdp-team1
 #### 2. Install Python Dependencies
 
 **Windows:**
+
 ```bash
 pip install -r requirements.txt
 ```
 
 **Linux/Mac:**
+
 ```bash
 pip3 install -r requirements.txt
 # or use virtual environment (recommended)
@@ -39,10 +41,12 @@ pip install -r requirements.txt
 #### 3. Install Webots
 
 **Windows:**
+
 - Download from: https://cyberbotics.com/
 - Run installer and add to PATH
 
 **Linux (Ubuntu/Debian):**
+
 ```bash
 # Download .deb package from cyberbotics.com
 sudo dpkg -i webots_2023b_amd64.deb
@@ -50,6 +54,7 @@ sudo apt-get install -f  # Fix dependencies if needed
 ```
 
 **Mac:**
+
 ```bash
 # Download .dmg from cyberbotics.com and install
 # Or use Homebrew:
@@ -57,6 +62,7 @@ brew install --cask webots
 ```
 
 #### 4. Install NAOqi SDK (for hardware phase)
+
 - Download from Aldebaran/SoftBank Robotics
 - Follow installation guide in `docs/user_guides/naoqi_setup.md`
 
@@ -96,19 +102,25 @@ brew install --cask webots
 
 ### Essential Commands
 
-| Task | Command |
-|------|---------|
-| Check status | `git status` |
-| Stage changes | `git add .` |
-| Commit | `git commit -m "WP[X]: Brief description"` |
-| Push | `git push origin branch-name` |
-| Pull latest | `git pull origin develop` |
+| Task          | Command                                       |
+| ------------- | --------------------------------------------- |
+| Check status  | `git status`                                |
+| Stage changes | `git add .`                                 |
+| Commit        | `git commit -m "WP[X]: Brief description"`  |
+| Push          | `git push origin branch-name`               |
+| Pull latest   | `git pull origin develop`                   |
 | Create branch | `git checkout -b feature/wp[X]-description` |
-| Switch branch | `git checkout branch-name` |
+| Switch branch | `git checkout branch-name`                  |
 
 ### Daily Team Workflow
 
 ```bash
+# 0. IMPORTANT: Save your work first!
+# If you have uncommitted changes, either commit them or stash them:
+git add .
+git commit -m "WP[X]: Work in progress"
+# OR: git stash  (to temporarily save changes)
+
 # 1. Start with latest changes
 git checkout develop
 git pull origin develop
@@ -125,15 +137,94 @@ git push origin feature/wp[X]-your-feature
 ```
 
 ### Branch Rules
+
 - **`main`** - Protected, stable releases only
 - **`develop`** - Integration branch, pull from here daily
 - **`feature/wp[X]-description`** - Your work branches
 - **Never commit directly to main/develop!**
 
+### 🚨 Common Git Issues
+
+**"I have uncommitted changes and need to switch branches":**
+
+```bash
+# Option 1: Commit your work in progress
+git add .
+git commit -m "WP[X]: Work in progress - will continue later"
+
+# Option 2: Stash changes temporarily
+git stash
+# ... do other work ...
+git stash pop  # Restore your changes later
+```
+
+**"Git won't let me switch branches":**
+
+```bash
+# Check what's preventing the switch
+git status
+
+# Usually means you have uncommitted changes - see above solutions
+```
+
+**"I forgot to pull latest changes before starting work":**
+
+```bash
+# If you haven't committed yet, stash and pull
+git stash
+git checkout develop
+git pull origin develop
+git checkout your-feature-branch
+git stash pop
+
+# If you have committed, merge develop into your branch
+git checkout develop
+git pull origin develop
+git checkout your-feature-branch
+git merge develop
+```
+
+### 🛠️ Recommended VS Code Extensions
+
+**Essential for this project:**
+
+- **Markdown All in One** - Preview, table of contents, auto-formatting
+- **Markdown Preview Enhanced** - Advanced preview with diagrams
+- **GitLens** - Supercharged Git capabilities, blame annotations, history
+- **Python** - Python language support, debugging, IntelliSense
+- **Pylance** - Fast Python language server
+- **autoDocstring** - Generates Python docstrings automatically
+- **Better Comments** - Colour-coded comment highlighting
+- **Bracket Pair Colorizer 2** - Matching bracket colours
+- **indent-rainbow** - Coloured indentation for better readability
+
+**Install via VS Code:**
+
+1. Press `Ctrl+Shift+X` (Extensions)
+2. Search for extension name
+3. Click "Install"
+
+**Extension IDs for quick install:**
+
+```
+yzhang.markdown-all-in-one
+shd101wyy.markdown-preview-enhanced
+eamodio.gitlens
+ms-python.python
+ms-python.vscode-pylance
+njpwerner.autodocstring
+aaron-bond.better-comments
+coenraads.bracket-pair-colorizer-2
+oderwat.indent-rainbow
+```
+
+**Quick install:** `Ctrl+Shift+P` → "Extensions: Install Extensions" → paste IDs above
+
 ### 📚 Need More Help?
-- **Comprehensive Guide:** [GitHub's Git Handbook](https://guides.github.com/introduction/git-handbook/)
+
+- **Comprehensive Guide:** [GitHub&#39;s Git Handbook](https://guides.github.com/introduction/git-handbook/)
 - **Interactive Tutorial:** [Learn Git Branching](https://learngitbranching.js.org/)
-- **Git Cheat Sheet:** [GitHub's Git Cheat Sheet](https://education.github.com/git-cheat-sheet-education.pdf)
+- **Git Cheat Sheet:** [GitHub&#39;s Git Cheat Sheet](https://education.github.com/git-cheat-sheet-education.pdf)
 
 ## Project Structure
 
@@ -182,12 +273,14 @@ pytest --cov=src tests/
 ## Contributing
 
 ### Coding Standards
+
 - **Python:** Follow PEP 8, max 100 chars/line, 4 spaces (no tabs)
 - **Naming:** `PascalCase` for classes, `snake_case` for functions, `UPPER_SNAKE_CASE` for constants
 - **Docstrings:** Use Google style for all public functions/classes
 - **Comments:** Explain *why*, not *what*
 
 ### Pull Request Rules
+
 1. **Create feature branch:** `feature/wp[X]-description`
 2. **Write tests** for new features (aim for 70% coverage)
 3. **Update documentation** if needed
@@ -195,6 +288,7 @@ pytest --cov=src tests/
 5. **No direct commits** to main/develop
 
 ### Code Review Checklist
+
 - [ ] Code follows style guide
 - [ ] Tests pass and coverage adequate
 - [ ] Documentation updated
@@ -202,6 +296,7 @@ pytest --cov=src tests/
 - [ ] Performance acceptable
 
 ### Work Package Responsibilities
+
 - **WP2 (Jie Shu):** Simulation accuracy, world configs, performance
 - **WP3 (Bonolo):** Control stability, clear APIs, safety
 - **WP4 (Zefu):** Modular behaviours, state machines, decision logic
@@ -211,21 +306,24 @@ pytest --cov=src tests/
 ## Development Logging
 
 ### Simplified Logging Process
-**Team members:** Maintain your individual WP log weekly  
+
+**Team members:** Maintain your individual WP log weekly
 **Technical Lead (Bonolo):** Consolidates key progress into main development log
 
 ### Your Responsibility: WP Log Only
+
 **Each team member maintains:** `docs/wp_logs/wp[X]_[name]_log.md`
 
 **Update weekly with:**
+
 - What you accomplished this week
 - Technical decisions and why you made them
-- Test results and metrics
-- Any blockers or issues
+- Any issues
 - Dependencies on other WPs
 - Commits/PRs for traceability
 
 **Example WP Log Entry:**
+
 ```
 #### Week 2 (Oct 21-27, 2025)
 - Implemented PID balance controller with Kp=1.2, Ki=0.1, Kd=0.05
@@ -235,19 +333,6 @@ pytest --cov=src tests/
 - Next: Test on slopes, integrate with motion controller
 - Related: commit abc123f, PR #15
 ```
-
-### Technical Lead Responsibility
-**Bonolo reviews all WP logs weekly and:**
-- Consolidates key progress into main `docs/development_log.md`
-- Tracks project-wide dependencies and blockers
-- Prepares progress summaries for reporting
-- Coordinates between work packages
-
-### Why This Approach Works
-- **Less overhead:** One log per person vs daily entries
-- **Better quality:** Weekly reflection vs rushed daily notes
-- **Centralized view:** Technical lead sees full project picture
-- **Report ready:** Consolidated information for final report
 
 ## 🔗 Useful Links
 
