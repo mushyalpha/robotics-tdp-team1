@@ -14,39 +14,39 @@
 
 ## Technical Requirements
 
-- Walking speed: 30-50 m/s
+- Walking speed:
 - Stand-up time: <20s
-- Kick accuracy: ±15°
-- Vision processing: 30 FPS, >90% accuracy
-- Control loop frequency: 50 Hz
+- Kick accuracy:
+- Vision processing:
+- Control loop frequency:
 - RoboCup rule compliance
 
 ---
 
 ## Development Progress
 
-### Phase 1: Foundation (Weeks 1-3)
-
-**Target:** Basic motion control framework
+### Phase 1: Basic motion control framework
 
 #### Week 2 (Oct 13-19, 2025)
 
 - [X] Set up project structure and files
 - [X] Create initial controller templates
-- [ ] Define control system architecture
-- [ ] Research NAO6 kinematics
 
 **Detailed Entries:**
 
 - **Oct 17 - Bonolo:** Created balance_controller.py, motion_controller.py, kick_algorithm.py, trajectory_planner.py templates
 
+**Time Spent:** 7 hours
+
 #### Week 3 (Oct 20-26, 2025)
 
+- [ ] Define control system architecture
+- [ ] Research NAO6 kinematics
 - [ ] Implement basic walking algorithm
-- [ ] Set up simulation testing environment
+- [X] Set up simulation testing environment
 - [ ] Define control interfaces
 
-#### Week 3 (Oct 27 - Nov 2, 2025)
+#### Week 4 (Oct 27 - Nov 2, 2025)
 
 - [ ] Balance controller implementation
 - [ ] Initial motion testing
