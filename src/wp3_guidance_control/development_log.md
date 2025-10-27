@@ -19,8 +19,8 @@
 #### Week 2 (Oct 13-19, 2025)
 
 - [X] Set up project structure and files
-- [X] Prepare for mini presentation about Guthub
-- [X] Create initial controller templates
+- [X] Created comprehensive ReadMe file that explains our project structure
+- [X] Create initial file code templates
 
 **Detailed Entries:**
 
@@ -30,7 +30,21 @@
 
 #### Week 3 (Oct 20-26, 2025)
 
-- [X] Set up simulation testing environment
+- [X] Prepared mini presentation on GitHub workflow and repository structure for team onboarding (2 hours)
+  - [X] Created slides covering branching strategy, PR process, and collaborative development
+  - [X] Prepared handouts with quick reference commands
+- [X] Created development log templates for all 6 work packages in **src/wp[X]_*/development_log.md** (1 hour)
+  - [X] Standardised format for tracking technical progress and decisions
+  - [X] Documented logging requirements and entry format guidelines
+- [X] Implemented GitHub workflow infrastructure (2 hours)
+  - [X] Set up branch protection rules and PR templates
+  - [X] Configured repository structure for collaborative development
+  - [X] Demonstrated workflow to team members
+  - [X] day to day updating of the repository
+- [X] Updated codebase files and documentation (2 hours)
+  - [X] Restructured project layout for clarity
+  - [X] Updated README with current project status
+  - [X] Cleaned and organised documentation
 
 #### Week 4 (Oct 27 - Nov 2, 2025)
 

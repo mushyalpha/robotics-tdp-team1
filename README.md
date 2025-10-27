@@ -317,10 +317,9 @@ pytest --cov=src tests/
 
 ## Documentation
 
-- **Project Plan:** `docs/project_plan.md`
+- **Team Coordination:** `docs/team_coordination.md` *(workflow tracking & current tasks)*
 - **Requirements:** `docs/requirements.md`
 - **Meeting Notes:** `docs/meeting_notes/`
-- **Development Log:** `docs/development_log.md` *(daily entries required)*
 - **Work Package Logs:** `docs/wp_logs/` *(detailed technical logs)*
 
 ## Contributing
