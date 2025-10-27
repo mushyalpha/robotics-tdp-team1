@@ -12,17 +12,6 @@
 - Integrate vision processing for ball and field detection
 - Support hardware integration and testing
 
-## Technical Requirements
-
-- Walking speed:
-- Stand-up time: <20s
-- Kick accuracy:
-- Vision processing:
-- Control loop frequency:
-- RoboCup rule compliance
-
----
-
 ## Development Progress
 
 ### Phase 1: Basic motion control framework
@@ -30,6 +19,7 @@
 #### Week 2 (Oct 13-19, 2025)
 
 - [X] Set up project structure and files
+- [X] Prepare for mini presentation about Guthub
 - [X] Create initial controller templates
 
 **Detailed Entries:**
@@ -40,16 +30,16 @@
 
 #### Week 3 (Oct 20-26, 2025)
 
-- [ ] Define control system architecture
-- [ ] Research NAO6 kinematics
-- [ ] Implement basic walking algorithm
 - [X] Set up simulation testing environment
-- [ ] Define control interfaces
 
 #### Week 4 (Oct 27 - Nov 2, 2025)
 
+- [ ] Define control system architecture
+- [ ] Research NAO6 kinematics
+- [ ] Implement basic walking algorithm
 - [ ] Balance controller implementation
 - [ ] Initial motion testing
+- [ ] Define control interfaces
 
 ### Phase 2: Core Development (Weeks 4-8)
 
