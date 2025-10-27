@@ -5,7 +5,7 @@
 
 ## How to Use This Log
 
-### Logging Process (Simplified)
+### Logging Process
 
 **Bonolo Masima** maintains this main development log by:
 
@@ -118,7 +118,7 @@
 
 ## Tips for Effective Logging
 
-### ✅ Good Entries:
+### Good Entries:
 
 ```
 **Oct 20 - Alice (WP3)** - 4 hours
@@ -130,7 +130,7 @@
 - Related: commit abc123f, PR #15
 ```
 
-### ❌ Poor Entries:
+### Poor Entries:
 
 ```
 **Oct 20 - Alice (WP3)** - 4 hours
@@ -139,7 +139,7 @@
 - Next: More work
 ```
 
-### 🎯 What to Include:
+### What to Include:
 
 - **Specific accomplishments** with measurable results
 - **Technical details** (parameters, algorithms, test results)
@@ -147,7 +147,7 @@
 - **Blockers and dependencies** for team coordination
 - **Code references** for traceability
 
-### 📝 Monthly Review Process:
+### Monthly Review Process:
 
 1. **Week 4 of each month:** All team members update their sections
 2. **WP1 (Project Manager):** Compiles monthly summary
