@@ -9,7 +9,6 @@
 - Develop low-level control algorithms for NAO6 robot
 - Implement motion control (walking, turning, balance)
 - Create ball manipulation algorithms (kicking, dribbling)
-- Integrate vision processing for ball and field detection
 - Support hardware integration and testing
 
 ## Development Progress
@@ -48,12 +47,27 @@
 
 #### Week 4 (Oct 27 - Nov 2, 2025)
 
-- [ ] Define control system architecture
-- [ ] Research NAO6 kinematics
-- [ ] Implement basic walking algorithm
-- [ ] Balance controller implementation
-- [ ] Initial motion testing
-- [ ] Define control interfaces
+- [X] Research NAO6 kinematics
+- [X] Initial motion testing in webots
+- [X] creating robot constraints file to define limitations of the robot
+
+#### Week 5 (Nov 3 - Nov 9, 2025)
+
+- [X] Update robot constraints from NaoV6.proto
+
+  - [X] compared legacy NAO.proto vs current NaoV6.proto
+  - [X] Updated all joint torque values (huge% increases)
+  - [X] Added asymmetric leg joint limits (left vs right knee/ankle)
+  - [X] Verified file runs correctly with new values
+
+**Detailed Entries:**
+
+- **Nov 3 - Bonolo:** Major update to robot_constraints.py with actual NaoV6.proto values
+  - Discovered all torque values were significantly underestimated (legacy NAO values)
+  - Identified asymmetric leg limits that weren't previously documented
+  - This will enable more accurate motion planning and force control
+
+**Time Spent:** 2 hours
 
 ### Phase 2: Core Development (Weeks 4-8)
 
@@ -86,10 +100,11 @@
 
 ### Architecture Decisions
 
-| Decision                      | Date   | Rationale                             | Impact   |
-| ----------------------------- | ------ | ------------------------------------- | -------- |
-| Python for control algorithms | Oct 17 | Team familiarity, NAOqi compatibility | Positive |
-| Modular controller design     | Oct 17 | Easier testing and maintenance        | Positive |
+| Decision                              | Date   | Rationale                                            | Impact   |
+| ------------------------------------- | ------ | ---------------------------------------------------- | -------- |
+| Python for control algorithms         | Oct 17 | Team familiarity, NAOqi compatibility                | Positive |
+| Modular controller design             | Oct 17 | Easier testing and maintenance                       | Positive |
+| Use NaoV6.proto as constraints source | Nov 3  | Ensures simulation accuracy, matches actual hardware | Critical |
 
 ### Algorithm Choices
 

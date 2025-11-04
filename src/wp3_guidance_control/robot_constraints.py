@@ -3,67 +3,67 @@ NAO6 Robot Physical Constraints and Limitations
 
 This module documents all physical constraints of the NAO6 robot based on:
 - Official NAO6 specifications (NAO6 Datasheet.md)
-- Webots NAO.proto file (webots_simulation/protos/NAO.proto)
+- Webots NaoV6.proto file
 - Physics calculations
-- Safety margins
 
-All values extracted from proto file on: October 28, 2025
-Proto file version: R2022b
+All values extracted from proto file on: November 3, 2025
+Proto file version: NaoV6.proto (current version)
 
-Author: WP3 Team (Guidance & Control)
-Date: October 2025
+IMPORTANT: Some joints have asymmetric limits (left vs right), particularly
+in leg joints (knee, ankle). This reflects the actual NAO6 hardware design.
+
+Author: WP3
+Date: October 2025 (Updated: November 2025)
 """
-
 
 class NAO6Constraints:
     """Physical constraints for NAO6 humanoid robot.
     
     All angles in radians, velocities in rad/s, distances in meters.
-    Values extracted directly from webots_simulation/protos/NAO.proto
+    Values extracted directly from webots_simulation/protos/NaoV6.proto
     """
     
-    # ==================== JOINT ANGLE LIMITS ====================
-    # Source: RotationalMotor minPosition/maxPosition in NAO.proto
+    # JOINT ANGLE LIMITS
     # Format: (min_angle, max_angle) in radians
     
     # HEAD JOINTS
-    HEAD_YAW_RANGE = (-2.08567, 2.08567)           # Left/right head turn (~119.5°)
-    HEAD_PITCH_RANGE = (-0.671952, 0.514872)       # Up/down head tilt (-38.5° to 29.5°)
+    HEAD_YAW_RANGE = (-2.0857, 2.0857)             # Left/right head turn (~119.5°)
+    HEAD_PITCH_RANGE = (-0.6720, 0.5149)           # Up/down head tilt (-38.5° to 29.5°)
     
     # LEFT ARM JOINTS
-    L_SHOULDER_PITCH_RANGE = (-2.08567, 2.08567)   # Forward/back arm swing (~±119.5°)
-    L_SHOULDER_ROLL_RANGE = (-0.314159, 1.32645)   # Arm raise to side (-18° to 76°)
-    L_ELBOW_YAW_RANGE = (-2.08567, 2.08567)        # Arm rotation (~±119.5°)
-    L_ELBOW_ROLL_RANGE = (-1.54462, -0.0349066)    # Elbow bend (-88.5° to -2°)
+    L_SHOULDER_PITCH_RANGE = (-2.0857, 2.0857)     # Forward/back arm swing (~±119.5°)
+    L_SHOULDER_ROLL_RANGE = (-0.3142, 1.3265)      # Arm raise to side (-18° to 76°)
+    L_ELBOW_YAW_RANGE = (-2.0857, 2.0857)          # Arm rotation (~±119.5°)
+    L_ELBOW_ROLL_RANGE = (-1.5446, -0.0349)        # Elbow bend (-88.5° to -2°)  [maxPosition commented in proto]
     L_WRIST_YAW_RANGE = (-1.82387, 1.82387)        # Wrist rotation (~±104.5°)
-    L_HAND_RANGE = (0.0, 1.0)                      # Hand open/close
+    L_HAND_RANGE = (0.0, 1.0)                      # Hand open/close (per phalanx)
     
     # RIGHT ARM JOINTS
-    R_SHOULDER_PITCH_RANGE = (-2.08567, 2.08567)
-    R_SHOULDER_ROLL_RANGE = (-1.32645, 0.314159)   # 
-    R_ELBOW_YAW_RANGE = (-2.08567, 2.08567)
-    R_ELBOW_ROLL_RANGE = (0.0349066, 1.54462)      #
-    R_WRIST_YAW_RANGE = (-1.82387, 1.82387)
-    R_HAND_RANGE = (0.0, 1.0)
+    R_SHOULDER_PITCH_RANGE = (-2.0857, 2.0857)     # Forward/back arm swing (~±119.5°)
+    R_SHOULDER_ROLL_RANGE = (-1.3265, 0.3142)      # Arm raise to side (mirrored)
+    R_ELBOW_YAW_RANGE = (-2.0857, 2.0857)          # Arm rotation (~±119.5°)
+    R_ELBOW_ROLL_RANGE = (0.0349, 1.5446)          # Elbow bend (2° to 88.5°)  [minPosition commented in proto]
+    R_WRIST_YAW_RANGE = (-1.82387, 1.82387)        # Wrist rotation (~±104.5°)
+    R_HAND_RANGE = (0.0, 1.0)                      # Hand open/close (per phalanx)
     
     # LEFT LEG JOINTS
-    L_HIP_YAW_PITCH_RANGE = (-1.14529, 0.740718)   # Hip yaw-pitch coupled joint (-65.6° to 42.4°)
-    L_HIP_ROLL_RANGE = (-0.379435, 0.79046)        # Side leg swing (-21.7° to 45.3°)
-    L_HIP_PITCH_RANGE = (-1.53589, 0.48398)        # Forward/back leg swing (-88° to 27.7°)
-    L_KNEE_PITCH_RANGE = (-0.0923279, 2.11255)     # Knee bend (-5.3° to 121°)
-    L_ANKLE_PITCH_RANGE = (-1.18944, 0.922581)     # Ankle pitch (-68.2° to 52.9°)
-    L_ANKLE_ROLL_RANGE = (-0.397761, 0.768992)     # Ankle roll (-22.8° to 44.1°)
+    L_HIP_YAW_PITCH_RANGE = (-1.145303, 0.740810)  # Hip yaw-pitch coupled joint (-65.6° to 42.4°)
+    L_HIP_ROLL_RANGE = (-0.379472, 0.790477)       # Side leg swing (-21.7° to 45.3°)
+    L_HIP_PITCH_RANGE = (-1.535889, 0.484090)      # Forward/back leg swing (-88° to 27.7°)
+    L_KNEE_PITCH_RANGE = (-0.092346, 2.112528)     # Knee bend (-5.3° to 121°)
+    L_ANKLE_PITCH_RANGE = (-1.189516, 0.922747)    # Ankle pitch (-68.2° to 52.9°)
+    L_ANKLE_ROLL_RANGE = (-0.397880, 0.769001)     # Ankle roll (-22.8° to 44.1°)
     
-    # RIGHT LEG JOINTS (symmetric to left)
-    R_HIP_YAW_PITCH_RANGE = (-1.14529, 0.740718)
-    R_HIP_ROLL_RANGE = (-0.79046, 0.379435)        # 
-    R_HIP_PITCH_RANGE = (-1.53589, 0.48398)
-    R_KNEE_PITCH_RANGE = (-0.0923279, 2.11255)
-    R_ANKLE_PITCH_RANGE = (-1.18944, 0.922581)
-    R_ANKLE_ROLL_RANGE = (-0.768992, 0.397761)     # Note: reversed from left
+    # RIGHT LEG JOINTS - NOTE: Asymmetric to left leg
+    R_HIP_YAW_PITCH_RANGE = (-1.145303, 0.740810)  # Same as left
+    R_HIP_ROLL_RANGE = (-0.790477, 0.379472)       # Mirrored from left
+    R_HIP_PITCH_RANGE = (-1.535889, 0.484090)      # Same as left
+    R_KNEE_PITCH_RANGE = (-0.103083, 2.120198)     # DIFFERENT from left!
+    R_ANKLE_PITCH_RANGE = (-1.186448, 0.932056)    # DIFFERENT from left!
+    R_ANKLE_ROLL_RANGE = (-0.768992, 0.397935)     # Mirrored from left
     
-    # ==================== JOINT VELOCITY LIMITS ====================
-    # RotationalMotor maxVelocity in NAO.proto (rad/s)
+    # JOINT VELOCITY LIMITS
+    # RotationalMotor maxVelocity in NaoV6.proto (rad/s)
     
     # HEAD
     HEAD_YAW_MAX_VELOCITY = 8.26797                # rad/s
@@ -75,7 +75,6 @@ class NAO6Constraints:
     ELBOW_YAW_MAX_VELOCITY = 8.26797               # rad/s
     ELBOW_ROLL_MAX_VELOCITY = 7.19407              # rad/s
     WRIST_YAW_MAX_VELOCITY = 24.6229               # rad/s 
-    HAND_MAX_VELOCITY = 8.33                        # rad/s
     
     # LEGS
     HIP_YAW_PITCH_MAX_VELOCITY = 4.16174           # rad/s (~238°/s)
@@ -86,27 +85,27 @@ class NAO6Constraints:
     ANKLE_ROLL_MAX_VELOCITY = 4.16174              # rad/s
     
     # JOINT TORQUE LIMITS
-    # RotationalMotor maxTorque in NAO.proto (Nm)
+    # RotationalMotor maxTorque in NaoV6.proto (Nm)
     
     # HEAD
-    HEAD_YAW_MAX_TORQUE = 2.148861                 # Nm
-    HEAD_PITCH_MAX_TORQUE = 2.477046               # Nm
+    HEAD_YAW_MAX_TORQUE = 4.0                      # Nm 
+    HEAD_PITCH_MAX_TORQUE = 5.0                    # Nm
     
     # ARMS
-    SHOULDER_PITCH_MAX_TORQUE = 3.366048           # Nm
-    SHOULDER_ROLL_MAX_TORQUE = 2.477046            # Nm
-    ELBOW_YAW_MAX_TORQUE = 2.148861                # Nm
-    ELBOW_ROLL_MAX_TORQUE = 2.477046               # Nm
-    WRIST_YAW_MAX_TORQUE = 0.475734                # Nm
-    HAND_MAX_TORQUE = 0.340656                     # Nm
+    SHOULDER_PITCH_MAX_TORQUE = 4.0                # Nm
+    SHOULDER_ROLL_MAX_TORQUE = 5.0                 # Nm 
+    ELBOW_YAW_MAX_TORQUE = 4.0                     # Nm 
+    ELBOW_ROLL_MAX_TORQUE = 5.0                    # Nm 
+    WRIST_YAW_MAX_TORQUE = 1.5                     # Nm 
+    HAND_MAX_TORQUE = 10.0                         # Nm
     
     # LEGS (higher torque for weight bearing)
-    HIP_YAW_PITCH_MAX_TORQUE = 13.0845             # Nm
-    HIP_ROLL_MAX_TORQUE = 13.0845                  # Nm
-    HIP_PITCH_MAX_TORQUE = 8.50525                 # Nm
-    KNEE_PITCH_MAX_TORQUE = 8.50525                # Nm
-    ANKLE_PITCH_MAX_TORQUE = 8.50525               # Nm
-    ANKLE_ROLL_MAX_TORQUE = 13.0845                # Nm
+    HIP_YAW_PITCH_MAX_TORQUE = 14.8                # Nm 
+    HIP_ROLL_MAX_TORQUE = 14.8                     # Nm 
+    HIP_PITCH_MAX_TORQUE = 9.8                     # Nm
+    KNEE_PITCH_MAX_TORQUE = 9.8                    # Nm 
+    ANKLE_PITCH_MAX_TORQUE = 9.8                   # Nm
+    ANKLE_ROLL_MAX_TORQUE = 14.8                   # Nm
     
     # PHYSICAL PROPERTIES
     # NAO6 Datasheet.md
@@ -196,7 +195,7 @@ class NAO6Constraints:
     ACCELEROMETER_RANGE = 2                        # g (gravity units)
     IMU_SAMPLE_RATE = 100                          # Hz
     
-    # ==================== ENVIRONMENTAL CONSTRAINTS ====================
+    # ENVIRONMENTAL CONSTRAINTS
     
     MAX_FLOOR_SLOPE = 5.0                          # degrees (maximum safe slope)
     COEFFICIENT_FRICTION = 0.6                     # rubber on artificial grass
@@ -210,7 +209,7 @@ class NAO6Constraints:
     PENALTY_AREA_WIDTH = 5.0                       # meters
     BALL_DIAMETER = 0.133                          # meters (133 mm)
     
-    # ==================== DEVICE NAMES ====================
+    # DEVICE NAME
     # For use in robot.getDevice() calls in controllers
     
     # Motors
@@ -235,7 +234,7 @@ class NAO6Constraints:
                  'SpeakerLeft', 'SpeakerRight'],
     }
     
-    # ==================== HELPER METHODS ====================
+    # HELPER METHODS
     
     @classmethod
     def get_safe_joint_limit(cls, joint_name, limit_type='position'):
@@ -285,7 +284,7 @@ class NAO6Constraints:
         return min_safe <= angle <= max_safe
 
 
-# ==================== MODULE-LEVEL CONSTANTS ====================
+# MODULE-LEVEL CONSTANTS
 
 #common constraints
 JOINT_LIMITS = {
