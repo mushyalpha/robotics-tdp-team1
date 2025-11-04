@@ -76,8 +76,23 @@ NaoV6 {
   name "NAO(6)"
 }
 NaoV6 {
+  hidden rotation_22 0 1 0 0.959999992898579
+  hidden rotation_23 0 1 0 0.9599999289054462
+  hidden rotation_24 0 1 0 0.9599999701997097
+  hidden rotation_25 0 1 0 0.9599999972627423
+  hidden rotation_26 0 1 0 0.9599999294878414
+  hidden rotation_27 0 1 0 0.9599999700188535
+  hidden rotation_29 0 -1 0 0.9599999729937864
+  hidden rotation_34 0 1 0 0.9599998871694817
+  hidden rotation_35 0 1 0 0.9599999159960182
+  hidden rotation_36 0 1 0 0.9599999809728595
+  hidden rotation_37 0 1 0 0.9599998872587258
+  hidden rotation_38 0 1 0 0.9599999159857017
+  hidden rotation_39 0 0.9999999999999999 0 0.9599999810053037
+  hidden rotation_41 0 -0.9999999999999999 0 0.9599999727950359
   translation -0.728188 -1.1003 1.034
   name "NAO(7)"
+  controller "my_nao_demo"
 }
 TexturedBackground {
   texture "stadium_dry"
