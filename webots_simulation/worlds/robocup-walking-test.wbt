@@ -1,0 +1,78 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/samples/contests/robocup/protos/RobocupSoccerField.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/balls/protos/RobocupSoccerBall.proto"
+EXTERNPROTO "../protos/NaoV6.proto"
+
+WorldInfo {
+  info [
+    "Description: official soccer simulation for the 2021 Robocup Virtual Humanoid League (kid size)"
+    "Version 0.2"
+  ]
+  title "Robocup V-HL Kid"
+  basicTimeStep 8
+  optimalThreadCount 8
+  physicsDisableTime 0.1
+  physicsDisableLinearThreshold 0.1
+  physicsDisableAngularThreshold 0.1
+  contactProperties [
+    ContactProperties {
+      material1 "grass"
+      coulombFriction [
+        0.5
+      ]
+      softCFM 0.03
+    }
+    ContactProperties {
+      material1 "grass"
+      material2 "robocup soccer ball"
+      coulombFriction [
+        0.5
+      ]
+      bounce 0.76
+      softCFM 0.05
+    }
+    ContactProperties {
+      material2 "robocup soccer ball"
+      bounce 0.76
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.14439897385555162 0.31778348411058294 0.937103299309101 1.210965639660446
+  position 2.1911417484665963 -1.7693982405780646 0.9390323615268977
+}
+NaoV6 {
+  hidden rotation_22 0 1 0 0.9600000001738971
+  hidden rotation_23 0 1 0 0.9599999999178881
+  hidden rotation_24 0 1 0 0.9599999998499493
+  hidden rotation_25 0 1 0 0.9600000001739049
+  hidden rotation_26 0 1 0 0.9599999999178842
+  hidden rotation_27 0 0.9999999999999999 0 0.9599999998499532
+  hidden rotation_29 0 -1 0 0.9599999999106243
+  hidden rotation_34 0 1 0 0.9600000001738971
+  hidden rotation_35 0 1 0 0.9599999999178842
+  hidden rotation_36 0 1 0 0.959999999849957
+  hidden rotation_37 0 1 0 0.9600000001739049
+  hidden rotation_38 0 1 0 0.9599999999178832
+  hidden rotation_39 0 1 0 0.9599999998499493
+  hidden rotation_41 0 -0.9999999999999999 0 0.9599999999106272
+  translation 3.019373215123225 -0.06645807274788539 0.34359053328738925
+  rotation -0.00010732675365777674 1.8309918119962462e-06 0.9999999942388078 3.1076952009089895
+  controller "walking_min"
+}
+TexturedBackground {
+  texture "stadium_dry"
+}
+TexturedBackgroundLight {
+  texture "stadium_dry"
+}
+RobocupSoccerField {
+  size "kid"
+}
+RobocupSoccerBall {
+  translation -4.3947178307385897e-05 0 0.07613606398100596
+  rotation 0 -1 0 0.0006278444173906422
+}
