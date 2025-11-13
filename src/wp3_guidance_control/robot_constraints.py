@@ -24,7 +24,23 @@ class NAO6Constraints:
     """
     
     # JOINT ANGLE LIMITS
-    # Format: (min_angle, max_angle) in radians
+    # (min,max) of angle in radians
+
+    # LEFT LEG JOINTS
+    L_HIP_YAW_PITCH_RANGE = (-1.145303, 0.740810)  # Hip yaw-pitch coupled joint (-65.6° to 42.4°)
+    L_HIP_ROLL_RANGE = (-0.379472, 0.790477)       # Side leg swing (-21.7° to 45.3°)
+    L_HIP_PITCH_RANGE = (-1.535889, 0.484090)      # Forward/back leg swing (-88° to 27.7°)
+    L_KNEE_PITCH_RANGE = (-0.092346, 2.112528)     # Knee bend (-5.3° to 121°)
+    L_ANKLE_PITCH_RANGE = (-1.189516, 0.922747)    # Ankle pitch (-68.2° to 52.9°)
+    L_ANKLE_ROLL_RANGE = (-0.397880, 0.769001)     # Ankle roll (-22.8° to 44.1°)
+    
+    # RIGHT LEG JOINTS - NOTE: Asymmetric to left leg
+    R_HIP_YAW_PITCH_RANGE = (-1.145303, 0.740810)  # Same as left
+    R_HIP_ROLL_RANGE = (-0.790477, 0.379472)       # Mirrored from left
+    R_HIP_PITCH_RANGE = (-1.535889, 0.484090)      # Same as left
+    R_KNEE_PITCH_RANGE = (-0.103083, 2.120198)     # DIFFERENT from left!
+    R_ANKLE_PITCH_RANGE = (-1.186448, 0.932056)    # DIFFERENT from left!
+    R_ANKLE_ROLL_RANGE = (-0.768992, 0.397935)     # Mirrored from left
     
     # HEAD JOINTS
     HEAD_YAW_RANGE = (-2.0857, 2.0857)             # Left/right head turn (~119.5°)
@@ -45,22 +61,6 @@ class NAO6Constraints:
     R_ELBOW_ROLL_RANGE = (0.0349, 1.5446)          # Elbow bend (2° to 88.5°)  [minPosition commented in proto]
     R_WRIST_YAW_RANGE = (-1.82387, 1.82387)        # Wrist rotation (~±104.5°)
     R_HAND_RANGE = (0.0, 1.0)                      # Hand open/close (per phalanx)
-    
-    # LEFT LEG JOINTS
-    L_HIP_YAW_PITCH_RANGE = (-1.145303, 0.740810)  # Hip yaw-pitch coupled joint (-65.6° to 42.4°)
-    L_HIP_ROLL_RANGE = (-0.379472, 0.790477)       # Side leg swing (-21.7° to 45.3°)
-    L_HIP_PITCH_RANGE = (-1.535889, 0.484090)      # Forward/back leg swing (-88° to 27.7°)
-    L_KNEE_PITCH_RANGE = (-0.092346, 2.112528)     # Knee bend (-5.3° to 121°)
-    L_ANKLE_PITCH_RANGE = (-1.189516, 0.922747)    # Ankle pitch (-68.2° to 52.9°)
-    L_ANKLE_ROLL_RANGE = (-0.397880, 0.769001)     # Ankle roll (-22.8° to 44.1°)
-    
-    # RIGHT LEG JOINTS - NOTE: Asymmetric to left leg
-    R_HIP_YAW_PITCH_RANGE = (-1.145303, 0.740810)  # Same as left
-    R_HIP_ROLL_RANGE = (-0.790477, 0.379472)       # Mirrored from left
-    R_HIP_PITCH_RANGE = (-1.535889, 0.484090)      # Same as left
-    R_KNEE_PITCH_RANGE = (-0.103083, 2.120198)     # DIFFERENT from left!
-    R_ANKLE_PITCH_RANGE = (-1.186448, 0.932056)    # DIFFERENT from left!
-    R_ANKLE_ROLL_RANGE = (-0.768992, 0.397935)     # Mirrored from left
     
     # JOINT VELOCITY LIMITS
     # RotationalMotor maxVelocity in NaoV6.proto (rad/s)
@@ -132,9 +132,9 @@ class NAO6Constraints:
     
     # FOOT GEOMETRY
     
-    FOOT_LENGTH = 0.160                            # meters (16 cm)
-    FOOT_WIDTH = 0.120                             # meters (12 cm)
-    FOOT_HEIGHT = 0.025                            # meters (2.5 cm)
+    FOOT_LENGTH = 0.160                            # m 
+    FOOT_WIDTH = 0.120                             # m 
+    FOOT_HEIGHT = 0.025                            # m
     
     # BALANCE CONSTRAINTS
     
@@ -144,39 +144,35 @@ class NAO6Constraints:
     STABLE_ZMP_REGION_Y = (-FOOT_WIDTH/2 + ZMP_MARGIN, FOOT_WIDTH/2 - ZMP_MARGIN)
     
     # Body Lean Limits 
-    MAX_FORWARD_LEAN = 0.15                        # radians (~8.6°)
-    MAX_BACKWARD_LEAN = 0.20                       # radians (~11.5°)
-    MAX_LATERAL_LEAN = 0.12                        # radians (~6.9°)
+    MAX_FORWARD_LEAN = 0.15                        # rad
+    MAX_BACKWARD_LEAN = 0.20                       # rad
+    MAX_LATERAL_LEAN = 0.12                        # rad
     
     # MOTION CONSTRAINTS
 
     # Walking Capabilities 
-    MAX_WALKING_SPEED_FORWARD = 0.15               # m/s
-    MAX_WALKING_SPEED_BACKWARD = 0.08              # m/s 
-    MAX_WALKING_SPEED_SIDEWAYS = 0.10              # m/s
-    MAX_TURNING_RATE = 0.40                        # rad/s
+    MAX_WALKING_SPEED_FORWARD = 0.15 # m/s
+    MAX_WALKING_SPEED_BACKWARD = 0.08 # m/s
+    MAX_WALKING_SPEED_SIDEWAYS = 0.1 # m/s 
+    MAX_TURNING_RATE = 1.25 # rad/s
     
     # Step Parameters
-    MAX_STEP_LENGTH = 0.08                         # m
-    MAX_STEP_HEIGHT = 0.020                        # m
-    MIN_STEP_DURATION = 0.4                        # s
-    SAFE_STEP_FREQUENCY = 1.5                      # Hz
+    MAX_STEP_LENGTH = 0.17 # m                 
+    MAX_STEP_HEIGHT = 0.31 # m         
+    MAX_STEP_FREQUENCY = 0.895 # Hz
+    MAX_STEP_ANGLE = 0.54 # rad ..from literature
     
     # Acceleration Limits
-    MAX_LINEAR_ACCELERATION = 0.5                  # m/s²
-    MAX_ANGULAR_ACCELERATION = 1.0                 # rad/s²
+    max_friction_force = 32.3 # N
+    MAX_LINEAR_ACCELERATION = 5.9 # m/s^2
+    MAX_ANGULAR_ACCELERATION = 240 # rad/s^2
     
     # KICK CONSTRAINTS
     
-    MAX_KICK_FORCE = 25.0                          # N
-    MAX_KICK_DISTANCE = 3.0                        # m
-    KICK_CONTACT_TIME = 0.10                       # s
-    
-    # Kick Geometry (to be validated)
-    KICK_APPROACH_ANGLES = (-45, 45)               # degrees
-    MIN_BALL_DISTANCE = 0.08                       # meters
-    MAX_BALL_DISTANCE = 0.25                       # meters
-    KICK_FOOT_CLEARANCE = 0.05                     # meters above ground - ESTIMATE
+    MAX_KICK_FORCE =                 
+    MAX_KICK_DISTANCE =
+    KICK_CONTACT_TIME =
+
     
     # SENSOR SPECIFICATIONS
     # Source: NAO6 Datasheet.md
@@ -186,9 +182,9 @@ class NAO6Constraints:
     CAMERA_FOV_HORIZONTAL = 56.3                   # degrees (HFOV)
     CAMERA_FOV_VERTICAL = 43.7                     # degrees (VFOV)
     CAMERA_FOV_DIAGONAL = 67.4                     # degrees (DFOV)
-    CAMERA_FPS = 30                                # frames per second
-    CAMERA_MAX_RANGE = 2.5                         # meters (recognition range)
-    CAMERA_FOCUS_RANGE = (0.10, float('inf'))      # meters (10 cm to infinity)
+    CAMERA_FPS = 30                                # fps
+    CAMERA_MAX_RANGE = 2.5                         # m (recognition range)
+    CAMERA_FOCUS_RANGE = (0.10, float('inf'))      # m (10 cm to infinity)
     
     # Inertial Measurement Unit (IMU)
     GYRO_RANGE = 500                               # degrees/second
@@ -197,17 +193,17 @@ class NAO6Constraints:
     
     # ENVIRONMENTAL CONSTRAINTS
     
-    MAX_FLOOR_SLOPE = 5.0                          # degrees (maximum safe slope)
+    MAX_FLOOR_SLOPE = 5.0                          # degrees
     COEFFICIENT_FRICTION = 0.6                     # rubber on artificial grass
     
-    # RoboCup Field Constraints (KidSize Humanoid League)
-    FIELD_LENGTH = 9.0                             # meters
-    FIELD_WIDTH = 6.0                              # meters
-    GOAL_WIDTH = 2.6                               # meters
-    GOAL_HEIGHT = 1.8                              # meters
-    PENALTY_AREA_LENGTH = 1.0                      # meters
-    PENALTY_AREA_WIDTH = 5.0                       # meters
-    BALL_DIAMETER = 0.133                          # meters (133 mm)
+    # RoboCup Field Constraints in metres (KidSize Humanoid League)
+    FIELD_LENGTH = 9.0                             
+    FIELD_WIDTH = 6.0                              
+    GOAL_WIDTH = 2.6                               
+    GOAL_HEIGHT = 1.8                             
+    PENALTY_AREA_LENGTH = 1.0                     
+    PENALTY_AREA_WIDTH = 5.0               
+    BALL_DIAMETER = 0.133                         
     
     # DEVICE NAME
     # For use in robot.getDevice() calls in controllers
