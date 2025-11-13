@@ -651,6 +651,7 @@ PROTO NaoV6 [
         lookupTable [
           -19.62 -19.62 0.01, 19.62 19.62 0.01
         ]
+        name "Accelerometer"
       }
       DEF GYRO Gyro {
         translation -0.008 0.006 0.029
@@ -658,11 +659,13 @@ PROTO NaoV6 [
           -8.726 -8.726 0.01, 8.726 8.726 0.01
         ]
         zAxis TRUE
+        name "Gyro"
       }
       DEF INERTIAL_UNIT InertialUnit {
         translation -0.008 0.006 0.029
         rotation 1 0 0 1.5708
         yAxis FALSE
+        name "InertialUnit"
       }
       DEF US1 Transform {
         translation 0.0537 -0.0341 0.0698
