@@ -1,0 +1,63 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/samples/contests/robocup/protos/RobocupSoccerField.proto"
+EXTERNPROTO "../protos/NaoV6.proto"
+
+WorldInfo {
+  info [
+    "Description: official soccer simulation for the 2021 Robocup Virtual Humanoid League (kid size)"
+    "Version 0.2"
+  ]
+  title "Robocup V-HL Kid"
+  basicTimeStep 8
+  optimalThreadCount 8
+  physicsDisableTime 0.1
+  physicsDisableLinearThreshold 0.1
+  physicsDisableAngularThreshold 0.1
+  contactProperties [
+    ContactProperties {
+      material1 "grass"
+      coulombFriction [
+        0.5
+      ]
+      softCFM 0.03
+    }
+    ContactProperties {
+      material1 "grass"
+      material2 "robocup soccer ball"
+      coulombFriction [
+        0.5
+      ]
+      bounce 0.76
+      softCFM 0.05
+    }
+    ContactProperties {
+      material2 "robocup soccer ball"
+      bounce 0.76
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.02373147000040287 0.061507830424289506 0.9978244355236628 1.8852065414119357
+  position 4.228472686400174 -8.887462953397653 2.0330517944012247
+}
+NaoV6 {
+  hidden rotation_23 0 1 0 0.9599999999178881
+  hidden rotation_26 0 1 0 0.9599999999178842
+  hidden rotation_35 0 1 0 0.9599999999178842
+  hidden rotation_38 0 1 0 0.9599999999178832
+  translation 3.019373215123225 -0.06645807274788539 0.34359053328738925
+  rotation -0.00010732675365777674 1.8309918119962462e-06 0.9999999942388078 3.1076952009089895
+  controller "my_nao_demo"
+}
+TexturedBackground {
+  texture "stadium_dry"
+}
+TexturedBackgroundLight {
+  texture "stadium_dry"
+}
+RobocupSoccerField {
+  size "kid"
+}
