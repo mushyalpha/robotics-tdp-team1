@@ -69,30 +69,49 @@
 
 **Time Spent:** 3 hours
 
-### Phase 2: Core Development (Weeks 4-8)
+#### Week 6 (Nov 10 - Nov 16, 2025)
+
+- [X] Created detailed  task assignments for WP3 team (1 hours)
+
+  - [X] Task 1: Walking Controller (Ciaran & Chengjie) - comprehensive gait generation, speed control
+  - [X] Task 2: Turning Controller Zefu, Bonolo & Jinghao) - in-place rotation, arc walking, sidestepping
+  - [X] Task 3: Balance Controller (for Bonolo and Jie) - PID control, IMU processing, fall recovery
+- [X] Implemented Balance Controller - Task 3.1: Balance Parameters (1.5 hours)
+
+  - [X] Designed three-zone stability system (safe/balance/fall zones)
+  - [X] Integrated NAO6Constraints body lean limits into stability logic
+  - [X] Implemented stability state detection methods
+  - [X] Created Jupyter notebook for interactive development
+
+**Detailed Entries:**
+
+- **Nov 13 - Bonolo:** Balance Controller Task 3.1 Implementation
+  - **Design Decision:** Three-zone stability architecture
+    - **Safe zone:** 0.12 rad roll, 0.15/0.20 rad pitch (from NAO6Constraints)
+    - **Balance zone:** 0.3 rad roll, 0.4 rad pitch (PID control can recover)
+    - **Fall zone:** 0.7 rad roll, 0.8 rad pitch (requires fall recovery sequence)
+  - **Rationale:** Progressive control strategy allows appropriate response based on severity
+    - Minimal corrections in safe zone (energy efficient)
+    - Active PID control in balance zone (maintains stability)
+    - Emergency recovery in fall zone (prevents damage)
+  - **Technical insight:** Body lean limits differ from joint limits
+    - Joint limits = physical range of motion (hardware constraint)
+    - Body lean limits = maximum tilt before CoM leaves support polygon (stability constraint)
+  - Implemented `get_stability_state()`, `is_stable()`, `is_falling()` methods
+  - Added angular velocity threshold (3.7 rad/s) for early fall detection
+  - Next: Task 3.2 PID Controller implementation
+
+**Time Spent:** 2.5 hours
+
+### Phase 2: Guidance behaviour (4 Weeks)
 
 **Target:** Functional motion and ball control
 
 - [ ] PID controller implementation
 - [ ] Walking gait optimisation
+- [ ] Trajectory planning
 - [ ] Kick algorithm development
-- [ ] Vision integration
 
-### Phase 3: Integration (Weeks 9-12)
-
-**Target:** System integration and testing
-
-- [ ] Hardware integration
-- [ ] Performance optimisation
-- [ ] System testing
-
-### Phase 4: Validation (Weeks 13-16)
-
-**Target:** Final testing and validation
-
-- [ ] Field testing
-- [ ] Performance validation
-- [ ] Documentation completion
 
 ---
 
@@ -108,11 +127,15 @@
 
 ### Algorithm Choices
 
-| Component       | Algorithm      | Justification           |
-| --------------- | -------------- | ----------------------- |
-| Balance Control | PID Controller | Simple, proven, tunable |
-| Walking Gait    | TBD            | Research needed         |
-| Kick Control    | TBD            | Depends on ball physics |
+| Component               | Algorithm                     | Justification                                                     |
+| ----------------------- | ----------------------------- | ----------------------------------------------------------------- |
+| Balance Control         | PID Controller                | Simple, proven, tunable for real-time control                     |
+| Balance Stability Zones | Three-zone progressive system | Allows energy-efficient minimal correction vs aggressive recovery |
+| IMU Data Processing     | Low-pass filter               | Reduces sensor noise while maintaining responsiveness             |
+| Fall Detection          | Angle + angular velocity      | Combines current state with rate of change for early detection    |
+| Zero Moment Point (ZMP) | Simplified CoM projection     | Computationally efficient for real-time stability verification    |
+| Walking Gait            | TBD                           | Research needed                                                   |
+| Kick Control            | TBD                           | Depends on ball physics                                           |
 
 ---
 
@@ -146,12 +169,12 @@
 
 ## Code Metrics
 
-| Metric               | Current | Target | Status |
-| -------------------- | ------- | ------ | ------ |
-| Lines of Code        | ~24     | TBD    | 🟡     |
-| Test Coverage        | 0%      | 80%    | 🔴     |
-| Functions Documented | 0%      | 100%   | 🔴     |
-| Performance Tests    | 0       | 10+    | 🔴     |
+| Metric               | Current | Target | Statu |
+| -------------------- | ------- | ------ | ----- |
+|                      |         |        |       |
+| Test Coverage        | 0%      | 80%    | 🔴    |
+| Functions Documented | 0%      | 100%   | 🔴    |
+| Performance Tests    | 0       | 10+    | 🔴    |
 
 ---
 
