@@ -22,10 +22,10 @@ class WalkingMin:
         self.set_neutral()
 
         # ——步态参数（固定常量）——
-        self.f0 = 0.8               # 固定步频（Hz），先从 0.8~1.2 之间试
+        self.f0 = 0.7               # 固定步频（Hz）
         self.phase = 0.0            # 全局相位
         # 摆幅基线（弧度）：可从小到大微调
-        self.A_hip_pitch   = 0.18   # 髋前后摆幅（主驱动）
+        self.A_hip_pitch   = 0.28   # 髋前后摆幅（主驱动）
         self.A_knee        = 0.40   # 膝抬腿幅度
         self.A_ankle_pitch = 0.20   # 踝俯仰（脚尖上抬/下压）
         self.A_hip_roll    = 0.04   # 髋滚（左右平衡）
