@@ -276,3 +276,7 @@ logs/
 .cursor/
 supervisor_meeting*.md
 !supervisor_meeting1.md
+
+# obsidian
+
+obsidian/
