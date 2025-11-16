@@ -274,5 +274,6 @@ logs/
 
 # Project specific
 .cursor/
+obsidian/
 supervisor_meeting*.md
 !supervisor_meeting1.md
