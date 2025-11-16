@@ -1,19 +1,6 @@
-# WP3: Guidance and Control - Development Log
-
-**Work Package Manager:** Bonolo Masima
-**Team Members:** Zefu Wang, Chengjie Hao
-**Duration:** October 2025 - February 2026
-
-## Objectives
-
-- Develop low-level control algorithms for NAO6 robot
-- Implement motion control (walking, turning, balance)
-- Create ball manipulation algorithms (kicking, dribbling)
-- Support hardware integration and testing
+# Bonolo Development Log
 
 ## Development Progress
-
-### Phase 1: Basic motion control framework
 
 #### Week 2 (Oct 13-19, 2025)
 
@@ -112,7 +99,6 @@
 - [ ] Trajectory planning
 - [ ] Kick algorithm development
 
-
 ---
 
 ## Technical Decisions
@@ -164,27 +150,6 @@
 ### Resolved Issues
 
 *None yet*
-
----
-
-## Code Metrics
-
-| Metric               | Current | Target | Statu |
-| -------------------- | ------- | ------ | ----- |
-|                      |         |        |       |
-| Test Coverage        | 0%      | 80%    | 🔴    |
-| Functions Documented | 0%      | 100%   | 🔴    |
-| Performance Tests    | 0       | 10+    | 🔴    |
-
----
-
-## Resources and References
-
-### Documentation
-
-- [NAO6 Technical Specifications](https://www.softbankrobotics.com/emea/en/nao)
-- [NAOqi Python SDK Documentation](http://doc.aldebaran.com/2-8/index.html)
-- [RoboCup Humanoid League Rules](https://humanoid.robocup.org/)
 
 ### Research Papers
 
