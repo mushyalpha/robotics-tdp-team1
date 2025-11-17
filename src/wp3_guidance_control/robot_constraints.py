@@ -169,9 +169,9 @@ class NAO6Constraints:
     
     # KICK CONSTRAINTS
     
-    MAX_KICK_FORCE =                 
-    MAX_KICK_DISTANCE =
-    KICK_CONTACT_TIME =
+    MAX_KICK_FORCE = None
+    MAX_KICK_DISTANCE = None
+    KICK_CONTACT_TIME = None
 
     
     # SENSOR SPECIFICATIONS
