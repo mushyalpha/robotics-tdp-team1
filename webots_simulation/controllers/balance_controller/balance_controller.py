@@ -110,4 +110,3 @@ while robot.step(timestep) != -1:
     LHipPitch.setPosition(output)
     RHipPitch.setPosition(output)
 
-    print(f"pitch={pitch:.3f}, error={error:.3f}, output={output:.3f}, I={integral:.3f}")

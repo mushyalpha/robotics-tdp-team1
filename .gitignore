@@ -260,6 +260,10 @@ webots_simulation/controllers/*/*.exe
 webots_simulation/controllers/*/*.dll
 *.wbproj
 
+# Webots world files - ignore working copies that get modified during simulation
+# Use *_template.wbt files as the clean reference versions
+webots_simulation/worlds/robocup.wbt
+
 # Choregraphe specific  
 *.xar
 
