@@ -58,37 +58,46 @@ class NaoDemo:
     def find_and_enable_devices(self):
         self.CameraTop = self.robot.getDevice("CameraTop")
         self.CameraBottom = self.robot.getDevice("CameraBottom")
-        self.CameraTop.enable(4 * self.time_step)
-        self.CameraBottom.enable(4 * self.time_step)
+        if self.CameraTop:
+            self.CameraTop.enable(4 * self.time_step)
+        if self.CameraBottom:
+            self.CameraBottom.enable(4 * self.time_step)
 
-        self.accelerometer = self.robot.getDevice("accelerometer")
-        self.accelerometer.enable(self.time_step)
+        self.accelerometer = self.robot.getDevice("Accelerometer")
+        if self.accelerometer:
+            self.accelerometer.enable(self.time_step)
 
-        self.gyro = self.robot.getDevice("gyro")
-        self.gyro.enable(self.time_step)
+        self.gyro = self.robot.getDevice("Gyro")
+        if self.gyro:
+            self.gyro.enable(self.time_step)
 
-        self.gps = self.robot.getDevice("gps")
-        self.gps.enable(self.time_step)
+        self.gps = self.robot.getDevice("GPS")
+        if self.gps:
+            self.gps.enable(self.time_step)
 
         self.inertial_unit = self.robot.getDevice("inertial unit")
-        self.inertial_unit.enable(self.time_step)
+        if self.inertial_unit:
+            self.inertial_unit.enable(self.time_step)
 
         self.us[0] = self.robot.getDevice("Sonar/Left")
         self.us[1] = self.robot.getDevice("Sonar/Right")
         for s in self.us:
-            s.enable(self.time_step)
+            if s:
+                s.enable(self.time_step)
 
         self.fsr[0] = self.robot.getDevice("LFsr")
         self.fsr[1] = self.robot.getDevice("RFsr")
         for s in self.fsr:
-            s.enable(self.time_step)
+            if s:
+                s.enable(self.time_step)
 
         self.lfoot_lbumper = self.robot.getDevice("LFoot/Bumper/Left")
         self.lfoot_rbumper = self.robot.getDevice("LFoot/Bumper/Right")
         self.rfoot_lbumper = self.robot.getDevice("RFoot/Bumper/Left")
         self.rfoot_rbumper = self.robot.getDevice("RFoot/Bumper/Right")
         for s in [self.lfoot_lbumper, self.lfoot_rbumper, self.rfoot_lbumper, self.rfoot_rbumper]:
-            s.enable(self.time_step)
+            if s:
+                s.enable(self.time_step)
 
         led_names = [
             "ChestBoard/Led", "RFoot/Led", "LFoot/Led",
@@ -142,11 +151,13 @@ class NaoDemo:
         self.leds[6].set(rgb & 0xff)
 
     def set_hands_angle(self, angle):
+        # Clamp angle to valid range to avoid floating-point precision warnings
+        clamped_angle = max(0.0, min(angle, 0.96))
         for j in range(PHALANX_MAX):
             if self.rphalanx[j]:
-                self.rphalanx[j].setPosition(angle)
+                self.rphalanx[j].setPosition(clamped_angle)
             if self.lphalanx[j]:
-                self.lphalanx[j].setPosition(angle)
+                self.lphalanx[j].setPosition(clamped_angle)
 
     def print_help(self):
         print("----------nao_demo----------")
