@@ -2,6 +2,7 @@ from controller import Robot
 import math
 from scipy.interpolate import make_interp_spline
 import pandas as pd
+import os
 
 class WalkingMin:
     """
@@ -35,8 +36,14 @@ class WalkingMin:
         self.f0 = 0.7        # fixed step frequency [Hz]; start within 0.8–1.2 for stability
         self.phase = 0.0            # global gait phase [0, 2π)
         
+        # Get the directory where THIS Python file is located
+        controller_dir = os.path.dirname(os.path.abspath(__file__))
+        # Go up one level (from controllers/nao_demo to webots_simulation)
+        project_root = os.path.abspath(os.path.join(controller_dir, "..", ".."))
+        # Build the path to motions folder
+        gait_dir = os.path.join(project_root, "gait_templates")
         # load the forward gait file
-        gait_df = pd.read_csv("../../motions/forward_walk_gait.csv")
+        gait_df = pd.read_csv(os.path.join(gait_dir, "forward_walk_gait.csv"))
         
         # convert from discete path to continous repeating path 
         self.gait_models = {}
