@@ -61,16 +61,16 @@ class NaoDemo:
         self.CameraTop.enable(4 * self.time_step)
         self.CameraBottom.enable(4 * self.time_step)
 
-        self.accelerometer = self.robot.getDevice("accelerometer")
+        self.accelerometer = self.robot.getDevice("Accelerometer")
         self.accelerometer.enable(self.time_step)
 
-        self.gyro = self.robot.getDevice("gyro")
+        self.gyro = self.robot.getDevice("Gyro")
         self.gyro.enable(self.time_step)
 
-        self.gps = self.robot.getDevice("gps")
+        self.gps = self.robot.getDevice("GPS")
         self.gps.enable(self.time_step)
 
-        self.inertial_unit = self.robot.getDevice("inertial unit")
+        self.inertial_unit = self.robot.getDevice("InertialUnitWWS")
         self.inertial_unit.enable(self.time_step)
 
         self.us[0] = self.robot.getDevice("Sonar/Left")

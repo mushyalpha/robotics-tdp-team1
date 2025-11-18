@@ -18,7 +18,7 @@ RHipPitch = robot.getDevice("RHipPitch")
 desired_pitch = 0.0
 Kp = 2.0
 Kd = 0.3
-Ki = 0.1                # integral gain
+Ki = 1               # integral gain
 
 previous_error = 0.0
 integral = 0.0

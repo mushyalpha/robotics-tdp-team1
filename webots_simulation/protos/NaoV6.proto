@@ -634,6 +634,7 @@ PROTO NaoV6 [
       }
       DEF GPS GPS {
         accuracy IS gpsAccuracy
+        name "GPS"
       }
       DEF RECEIVER Receiver {
         channel IS channel
