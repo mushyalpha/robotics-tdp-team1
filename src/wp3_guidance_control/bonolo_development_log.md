@@ -116,6 +116,78 @@
   │  └─ Personal notes in Obsidian remain private while technical decisions are documented in team log
   ├─ **Impact:** Streamlined Git workflow reduces confusion and prevents merge conflicts
   └─ **Time Spent:** 1.5 hours
+- **Nov 17 - Bonolo:** Webots Controller Debugging and Repository Management
+  ├─ **Context:** my_nao_demo controller not working - robots not responding to keyboard input
+  ├─ **Root Cause Analysis:**
+  │  ├─ Identified console output was from balance_controller (different NAO robot), not my_nao_demo
+  │  ├─ Discovered device naming mismatch: lowercase names ("accelerometer") vs actual NAO devices ("Accelerometer")
+  │  └─ Controller was crashing on initialization due to NoneType errors when devices weren't found
+  ├─ **Actions taken:**
+  │  ├─ Fixed device names: "accelerometer" → "Accelerometer", "gyro" → "Gyro", "gps" → "GPS"
+  │  ├─ Added safety checks (null validation) for all device initialization to prevent crashes
+  │  ├─ Added position clamping (0.0 to 0.96) in set_hands_angle() to eliminate floating-point precision warnings
+  │  └─ Controller now successfully initializes and responds to keyboard input
+  ├─ **Repository Management - Webots World Files:**
+  │  ├─ **Design Decision:** Template-based world file system to prevent simulation state commits
+  │  ├─ **Implementation:**
+  │  │  ├─ Created robocup_template.wbt as clean reference (tracked in git)
+  │  │  ├─ Added robocup.wbt to .gitignore (local working copy, not tracked)
+  │  │  └─ Documented workflow in team discussion for copying template when needed
+  │  ├─ **Rationale:**
+  │  │  ├─ Webots modifies .wbt files during simulation (robot positions, camera angles, physics state)
+  │  │  ├─ Creates hundreds of lines of diff that aren't actual code changes
+  │  │  └─ Template system allows local simulation without creating git noise
+  │  └─ **Impact:** Team members can run simulations freely without committing simulation state
+  ├─ **Key learnings:**
+  │  ├─ Webots device names are case-sensitive - always check actual device names in PROTO files
+  │  ├─ Multi-robot simulations require careful attention to which controller outputs which messages
+  │  ├─ Defensive programming (null checks) prevents cascading failures in robotics controllers
+  │  └─ Git workflow discussion: importance of pulling before pushing to prevent conflicts
+  └─ **Time Spent:** 1 hour
+- **Nov 17 (3:30-5:30 PM) - Bonolo:** Balance Controller Task 3.5 & 3.6 - Fall Recovery Architecture Design
+  ├─ **Context:** Designing fall recovery sequences and balance adjustment calculations for NAO6
+  ├─ **Design Decision:** Separate balance control from fall recovery with clear state transitions
+  │  ├─ **Balance adjustments** (Task 3.5): PID-based corrections for small disturbances
+  │  ├─ **Fall recovery sequences** (Task 3.6): Multi-phase scripted motions for getting up after falls
+  │  └─ Both driven by real-time IMU + gyro data in Webots controller
+  ├─ **Key Technical Insights:**
+  │  ├─ **Hardware limits vs operational limits:** NAO6Constraints contains maximum possible values, not safe operating ranges
+  │  │  ├─ Need to define safety margins (e.g., 80% of joint range) for control and recovery
+  │  │  ├─ Robot becomes unstable (~0.15 rad pitch) well before reaching joint limits
+  │  │  └─ Should use get_safe_joint_limit() when designing recovery keyframes
+  │  ├─ **IMU reading importance:** Must read IMU every robot.step() to close feedback loop
+  │  │  ├─ InertialUnit provides roll/pitch/yaw angles (rad)
+  │  │  ├─ Gyro provides angular velocities (rad/s) for roll_rate, pitch_rate, yaw_rate
+  │  │  └─ Enables reactive control vs open-loop pre-scripted motions
+  │  ├─ **Threshold region refinement:** Clarified three-zone architecture needs explicit boundaries
+  │  │  ├─ Safe zone: minimal/no correction (e.g., roll < 0.10, pitch < 0.10/0.12)
+  │  │  ├─ Balance zone: PID active (e.g., roll < 0.25, pitch < 0.30)
+  │  │  └─ Fall zone: recovery sequence triggered (e.g., roll > 0.6, pitch > 0.6, OR angular velocity > 3.7 rad/s)
+  │  └─ **Fall detection:** Must combine angle AND angular velocity for early detection
+  ├─ **Implementation Progress:**
+  │  ├─ Completed `calculate_balance_adjustments()` design (Task 3.5)
+  │  │  ├─ PID corrections applied to ankle roll/pitch (primary) and hip roll/pitch (secondary, 0.3-0.5x gain)
+  │  │  ├─ Output clamping to ±0.2 rad per control cycle for safety
+  │  │  └─ Ready for integration with real IMU data in Webots
+  │  ├─ Completed `FallRecovery` class structure (Task 3.6)
+  │  │  ├─ `detect_fall_direction()`: determines front/back/left/right from roll/pitch
+  │  │  ├─ `get_recovery_sequence_front()`: 5-phase recovery (tuck → push → feet under body → stand → stable)
+  │  │  ├─ `get_recovery_sequence_back()`: placeholder structure (to be tuned)
+  │  │  └─ `update_recovery()`: phase timing (1 sec per phase) and completion detection
+  │  └─ Fixed logic bug: `is_falling()` was always returning False (missing angular velocity check)
+  ├─ **Testing Strategy Defined:**
+  │  ├─ **Phase 1:** Prototype in Jupyter notebook with fake IMU data to verify state transitions
+  │  ├─ **Phase 2:** Move logic into Webots controller (balance_controller.py)
+  │  ├─ **Phase 3:** Test in Webots by manually pushing robot or using tipped initial poses
+  │  ├─ **Phase 4:** Tune thresholds based on real behavior (e.g., "wobbly at 0.15 pitch")
+  │  └─ **Phase 5:** Validate recovery sequences respect NAO6Constraints limits
+  ├─ **Next Steps:**
+  │  ├─ Complete Task 3.5 & 3.6 TODOs in balance_controller.ipynb
+  │  ├─ Test balance adjustment logic with simulated IMU data
+  │  ├─ Integrate FallRecovery into balance_controller.py for Webots testing
+  │  ├─ Tune recovery sequence joint angles using NAO6Constraints.get_safe_joint_limit()
+  │  └─ Begin Task 3.2 (PID Controller) and Task 3.3 (IMU Processing) if time permits
+  └─ **Time Spent:** 2 hours
 
 ## Technical Decisions
 
@@ -127,6 +199,7 @@
 | Modular controller design             | Oct 17 | Easier testing and maintenance                            | Positive |
 | Use NaoV6.proto as constraints source | Nov 3  | Ensures simulation accuracy, matches actual hardware      | Critical |
 | Centralised team development log      | Nov 16 | Reduces overhead, centralises decisions, easier reporting | Positive |
+| Template-based Webots world files     | Nov 17 | Prevents simulation state commits, reduces git noise      | Positive |
 
 ### Algorithm Choices
 
@@ -178,4 +251,4 @@
 
 ---
 
-*Last updated: November 16, 2025*
+*Last updated: November 17, 2025*

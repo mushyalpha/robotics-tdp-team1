@@ -131,12 +131,26 @@ class NaoDemo:
         self.hand_wave = Motion(os.path.join(motions_dir, "HandWave.motion"))
         self.forwards = Motion(os.path.join(motions_dir, "Forwards50.motion"))
         self.backwards = Motion(os.path.join(motions_dir, "Backwards.motion"))
+        
+        # Sidestep motions - loaded and ready for arrow keys
         self.side_step_left = Motion(os.path.join(motions_dir, "SideStepLeft.motion"))
         self.side_step_right = Motion(os.path.join(motions_dir, "SideStepRight.motion"))
+        
         self.turn_left_60 = Motion(os.path.join(motions_dir, "TurnLeft60.motion"))
         self.turn_right_60 = Motion(os.path.join(motions_dir, "TurnRight60.motion"))
         self.tai_chi = Motion(os.path.join(motions_dir, "TaiChi.motion"))
         self.wipe_forehead = Motion(os.path.join(motions_dir, "WipeForehead.motion"))
+        
+        # Verify sidestep motions loaded successfully
+        if self.side_step_left:
+            print("✓ SideStepLeft.motion loaded successfully")
+        else:
+            print("✗ Warning: SideStepLeft.motion failed to load")
+            
+        if self.side_step_right:
+            print("✓ SideStepRight.motion loaded successfully")
+        else:
+            print("✗ Warning: SideStepRight.motion failed to load")
 
     def start_motion(self, motion):
         if self.currently_playing:
@@ -162,8 +176,10 @@ class NaoDemo:
     def print_help(self):
         print("----------nao_demo----------")
         print("Keyboard controls:")
-        print("[↑][↓]: walk forward/backward")
-        print("[←][→]: side steps")
+        print("[↑]: walk forward")
+        print("[↓]: walk backward")
+        print("[←]: sidestep LEFT (SideStepLeft.motion)")
+        print("[→]: sidestep RIGHT (SideStepRight.motion)")
         print("[Shift]+[←][→]: turn left/right")
         print("[A]: accelerometer")
         print("[G]: gyro")
@@ -198,14 +214,24 @@ class NaoDemo:
                 self.set_all_leds_color(0x0000ff)
             elif key == ord('0'):
                 self.set_all_leds_color(0x000000)
-            elif key == 315:  # UP
+            elif key == 315:  # UP arrow - walk forward
                 self.start_motion(self.forwards)
-            elif key == 317:  # DOWN
+                print("→ Walking forward")
+            elif key == 317:  # DOWN arrow - walk backward
                 self.start_motion(self.backwards)
-            elif key == 314:  # LEFT
-                self.start_motion(self.side_step_left)
-            elif key == 316:  # RIGHT
-                self.start_motion(self.side_step_right)
+                print("→ Walking backward")
+            elif key == 314:  # LEFT arrow - sidestep left
+                if self.side_step_left:
+                    self.start_motion(self.side_step_left)
+                    print("→ Sidestepping LEFT")
+                else:
+                    print("✗ SideStepLeft motion not loaded!")
+            elif key == 316:  # RIGHT arrow - sidestep right
+                if self.side_step_right:
+                    self.start_motion(self.side_step_right)
+                    print("→ Sidestepping RIGHT")
+                else:
+                    print("✗ SideStepRight motion not loaded!")
             elif key == 366:  # PageUp
                 self.set_hands_angle(0.96)
             elif key == 367:  # PageDown
