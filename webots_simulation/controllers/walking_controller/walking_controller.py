@@ -4,6 +4,7 @@ from scipy.interpolate import make_interp_spline
 import pandas as pd
 import os
 from typing import Dict, Any
+import json  # ★ NEW
 
 
 # Joint names for convenience / clarity
@@ -43,6 +44,9 @@ class WalkingMin:
         # Convert Webots basicTimeStep (ms) to seconds
         self.dt: float = int(self.robot.getBasicTimeStep()) / 1000.0
 
+        # ★ NEW: access own node and track last customData payload
+        self._last_custom_data: str = ""
+
         # Motor devices setup
         self.motors: Dict[str, Any] = {}
         for name in JOINT_NAMES_L + JOINT_NAMES_R:
@@ -63,7 +67,7 @@ class WalkingMin:
         self.set_neutral()
 
         # Gait parameters for continuous walking state
-        self.f0: float = 1.5      # "step frequency" [Hz] through frac_step
+        self.f0: float = 1.0      # "step frequency" [Hz] through frac_step
         self.target_steps: int = target_steps
 
         # Paths to gait templates
@@ -158,6 +162,42 @@ class WalkingMin:
         dz = pos[2] - self.initial_pos[2]  # assuming Y is vertical
         self.current_distance = math.hypot(dx, dz)
 
+    # read parameters from Supervisor via customData
+    def _update_from_custom_data(self) -> None:
+        """
+        Reads:
+          {"step_frequency": 1.2, "target_distance": 3.0}
+        from Robot's customData string set by Supervisor.
+        """
+        data = self.robot.getCustomData()
+        if not data or data == self._last_custom_data:
+            return  # nothing new
+    
+        self._last_custom_data = data
+    
+        try:
+            cfg = json.loads(data)
+        except json.JSONDecodeError:
+            print(f"[WalkingMin] WARN: invalid customData JSON: {data}")
+            return
+    
+        if "step_frequency" in cfg:
+            try:
+                self.f0 = float(cfg["step_frequency"])
+                print(f"[WalkingMin] step_frequency (f0) updated to {self.f0} Hz")
+            except (TypeError, ValueError):
+                print(f"[WalkingMin] WARN: bad step_frequency in customData: "
+                      f"{cfg['step_frequency']}")
+    
+        if "target_distance" in cfg:
+            try:
+                self.target_distance = float(cfg["target_distance"])
+                print(f"[WalkingMin] target_distance updated to {self.target_distance} m")
+            except (TypeError, ValueError):
+                print(f"[WalkingMin] WARN: bad target_distance in customData: "
+                      f"{cfg['target_distance']}")
+
+
 
     # Motor helpers
     def set_leg_pose(
@@ -225,6 +265,9 @@ class WalkingMin:
         timestep_ms = int(self.dt * 1000)
 
         while self.robot.step(timestep_ms) != -1:
+            # allow Supervisor to update f0 / target_distance
+            self._update_from_custom_data()
+
             # Update travelled distance from the very beginning
             self._update_distance()
 
@@ -269,7 +312,7 @@ class WalkingMin:
                     self.step_counter += (cycle_index - self.prev_cycle_index)
                     self.prev_cycle_index = cycle_index
 
-                # ---- Decide when to stop walking ----
+                # Decide when to stop walking
                 use_distance = (
                     self.target_distance is not None and self.gps is not None
                 )
@@ -321,7 +364,6 @@ if __name__ == "__main__":
         start_csv="motor_patterns_smooth_start.csv",
         walk_csv="motor_patterns_continous_gait.csv",
         stop_csv="motor_patterns_smooth_stop.csv",
-        target_steps=20, # number of walking cycles
-        target_distance=2.0,     # desired total distance [m]
+        target_distance=10.0,     # desired total distance [m]
         stop_distance_offset=0.05   # expected distance during stopping phase [m]
     ).run()
