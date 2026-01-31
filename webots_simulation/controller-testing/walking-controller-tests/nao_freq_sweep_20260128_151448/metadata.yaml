@@ -1,0 +1,54 @@
+experiment_id: nao_freq_sweep_20260128_151448
+timestamp: '2026-01-28T15:14:48.733538'
+robot:
+  def_name: NAO
+  type: NAO
+  controller: WalkingMin
+  controller_version: 0.1.0
+  gait_templates:
+    start: motor_patterns_smooth_start.csv
+    walk: motor_patterns_continous_gait.csv
+    stop: motor_patterns_smooth_stop.csv
+simulation:
+  webots_version: R2025a
+  world_file: WP2_single-robot-controller-test.wbt)
+  basic_time_step_ms: 8
+  notes: ''
+protocol:
+  test_type: frequency_sweep_time_based
+  frequencies_hz:
+  - 0.1
+  - 0.5
+  - 0.8
+  - 1.0
+  - 1.2
+  - 1.3
+  - 1.4
+  - 1.45
+  - 1.5
+  - 1.55
+  sim_duration_s: 20.0
+  axes:
+    forward: x
+    drift: y
+    height: z
+  failure_criterion:
+    type: height_threshold
+    height_axis: z
+    threshold_m: 0.15
+    description: Trial fails if min(z) < threshold at any time.
+logging:
+  directory: ..\..\controller-testing\walking-controller-tests\nao_freq_sweep_20260128_151448
+  csv_file: batch_measurements_full.csv
+  columns:
+  - trial_index
+  - step_frequency
+  - t_abs
+  - t_rel
+  - x
+  - y
+  - z
+  - rot_x
+  - rot_y
+  - rot_z
+  - rot_angle
