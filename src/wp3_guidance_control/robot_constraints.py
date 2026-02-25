@@ -32,7 +32,7 @@ class NAO6Constraints:
     L_HIP_PITCH_RANGE = (-1.535889, 0.484090)      # Forward/back leg swing (-88° to 27.7°)
     L_KNEE_PITCH_RANGE = (-0.092346, 2.112528)     # Knee bend (-5.3° to 121°)
     L_ANKLE_PITCH_RANGE = (-1.189516, 0.922747)    # Ankle pitch (-68.2° to 52.9°)
-    4L_ANKLE_ROLL_RANGE = (-0.397880, 0.769001)     # Ankle roll (-22.8° to 44.1°)
+    L_ANKLE_ROLL_RANGE = (-0.397880, 0.769001)      # Ankle roll (-22.8° to 44.1°)
     
     # RIGHT LEG JOINTS - NOTE: Asymmetric to left leg
     R_HIP_YAW_PITCH_RANGE = (-1.145303, 0.740810)  # Same as left

@@ -330,8 +330,8 @@ class FallRecovery:
                 'RKneePitch': 2.0,      # Right knee bent
                 'LAnklePitch': -0.5,
                 'RAnklePitch': 0.8,
-                'LHipRoll': -0.6,       # Strong roll left
-                'RHipRoll': 0.7,        # Strong roll left
+                'LHipRoll': -0.37,      # Strong roll left (clamped to joint limit)
+                'RHipRoll': 0.37,       # Strong roll left (clamped to joint limit)
                 'LShoulderPitch': 2.0,  # Arms up and forward
                 'RShoulderPitch': 2.0,
                 'LShoulderRoll': 0.3,
@@ -346,8 +346,8 @@ class FallRecovery:
                 'RKneePitch': 2.0,
                 'LAnklePitch': -0.3,
                 'RAnklePitch': 0.7,
-                'LHipRoll': -0.5,
-                'RHipRoll': 0.5,
+                'LHipRoll': -0.37,      # Clamped to joint limit
+                'RHipRoll': 0.37,       # Clamped to joint limit
                 'LShoulderPitch': 1.8,
                 'RShoulderPitch': 1.8,
                 'LElbowRoll': -1.0,
