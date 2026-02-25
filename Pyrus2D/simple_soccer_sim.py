@@ -126,13 +126,12 @@ class SoccerSimulator:
         self.time = 0
         self.goals_scored = 0
         
-        # Create team (5 players for simplicity)
+        # Create team (4 players: 1 goalkeeper, 1 defender, 2 attackers)
         positions = [
-            (-3, 0),    # Goalie
-            (-2, -1.5), # Defender
-            (-2, 1.5),  # Defender
-            (0, -1),    # Midfielder
-            (0, 1),     # Midfielder
+            (-3.5, 0),   # Goalkeeper (ID: 1)
+            (-2, 0),     # Defender (ID: 2)
+            (0, -1),     # Attacker 1 (ID: 3)
+            (0, 1),      # Attacker 2 (ID: 4)
         ]
         for i, (x, y) in enumerate(positions):
             self.robots.append(Robot(x, y, 'blue', i+1))

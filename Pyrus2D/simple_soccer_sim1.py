@@ -11,8 +11,10 @@ VERSION 1 FEATURES:
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation, PillowWriter
+from datetime import datetime
 import time
+import os
 
 # Field dimensions
 PITCH_LENGTH = 9.0
@@ -98,13 +100,12 @@ class SoccerSimulator:
         self.time = 0
         self.goals_scored = 0
         
-        # Create team (5 players for simplicity)
+        # Create team (4 players: 1 goalkeeper, 1 defender, 2 attackers)
         positions = [
-            (-3, 0),    # Goalie
-            (-2, -1.5), # Defender
-            (-2, 1.5),  # Defender
-            (0, -1),    # Midfielder
-            (0, 1),     # Midfielder
+            (-3.5, 0),   # Goalkeeper (ID: 1)
+            (-2, 0),     # Defender (ID: 2)
+            (0, -1),     # Attacker 1 (ID: 3)
+            (0, 1),      # Attacker 2 (ID: 4)
         ]
         for i, (x, y) in enumerate(positions):
             self.robots.append(Robot(x, y, 'blue', i+1))
@@ -315,10 +316,37 @@ class Visualizer:
         
         return []
     
-    def run(self, frames=500):
-        """Run the animation"""
+    def run(self, frames=500, save_gif=False, gif_filename=None):
+        """Run the animation and optionally save as GIF"""
         anim = FuncAnimation(self.fig, self.update, frames=frames, 
                            interval=50, blit=True)
+        
+        if save_gif:
+            if gif_filename is None:
+                # Generate timestamp-based filename
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                algo = self.sim.decision_algorithm
+                gif_filename = f"sim1_{algo}_{timestamp}.gif"
+            
+            # Ensure output directory exists
+            output_dir = "animation_outputs"
+            os.makedirs(output_dir, exist_ok=True)
+            gif_path = os.path.join(output_dir, gif_filename)
+            
+            print(f"Saving animation to {gif_path}...")
+            print("This may take a minute...")
+            
+            # Save as GIF using PillowWriter
+            writer = PillowWriter(fps=20)
+            anim.save(gif_path, writer=writer)
+            
+            print(f"✓ Animation saved successfully!")
+            print(f"  Location: {gif_path}")
+            
+            # Calculate file size
+            file_size_mb = os.path.getsize(gif_path) / (1024 * 1024)
+            print(f"  File size: {file_size_mb:.2f} MB")
+        
         plt.show()
 
 def main():
@@ -346,13 +374,28 @@ def main():
     
     algorithm = algorithms.get(choice, 'v1_basic')
     
+    # Ask about saving as GIF
+    save_choice = input("\nSave animation as GIF? (y/n, default=n): ").strip().lower()
+    save_gif = save_choice == 'y'
+    
+    num_frames = 1000
+    if save_gif:
+        frame_input = input(f"Number of frames to record (default={num_frames}): ").strip()
+        if frame_input:
+            try:
+                num_frames = int(frame_input)
+            except ValueError:
+                print(f"Invalid input, using default: {num_frames}")
+    
     print(f"\nRunning VERSION 1 (BASIC) with {algorithm} algorithm...")
     print("Ball moves in perfect straight lines - not realistic!")
+    if save_gif:
+        print(f"Recording {num_frames} frames for GIF export...")
     print("Close the window to exit.\n")
     
     sim = SoccerSimulator(decision_algorithm=algorithm)
     viz = Visualizer(sim)
-    viz.run(frames=1000)
+    viz.run(frames=num_frames, save_gif=save_gif)
 
 if __name__ == "__main__":
     main()
