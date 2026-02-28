@@ -174,6 +174,10 @@ SET_PIECE_WAIT_STEPS = 30     # ~1.5s wait before set piece resumes
 TRACKBACK_SPEED = 0.0072      # Walk speed during trackback (~14.4 cm/s, slightly faster than normal 12 cm/s)
 TRACKBACK_THRESHOLD = 0.5     # Distance threshold to consider "at home"
 
+# Robot collision — approximate each robot as a circle for overlap resolution
+# Real dimensions: 311 mm × 275 mm → average radius ≈ (0.311 + 0.275) / 4 ≈ 0.147 m
+ROBOT_COLLISION_RADIUS = 0.147  # metres
+
 # =============================================================================
 # ENUMS
 # =============================================================================
@@ -461,8 +465,14 @@ class SoccerSimulator:
         self.total_passes_red = 0
         self.pass_target = None
 
+        # Kickoff robot (the attacker standing at centre circle)
+        self.kickoff_robot = None
+
         # Metrics logging
         self.step_log = []
+
+        # Position the first kickoff
+        self._setup_kickoff()
 
     def _create_teams(self):
         """Create both teams with mirrored positions."""
@@ -496,6 +506,33 @@ class SoccerSimulator:
 
     def _get_attack_direction(self, robot):
         return 1 if robot.team == 'blue' else -1
+
+    # -----------------------------------------------------------------
+    # KICKOFF SETUP
+    # -----------------------------------------------------------------
+
+    def _setup_kickoff(self):
+        """Place the frontmost attacker of the kickoff team at the centre spot."""
+        team_robots = self.blue_robots if self.kickoff_team == 'blue' else self.red_robots
+        attack_dir  = 1 if self.kickoff_team == 'blue' else -1
+
+        # Pick the attacker who is furthest forward (closest to opponent goal)
+        attackers = [r for r in team_robots if r.role == RobotRole.ATTACKER]
+        if not attackers:
+            attackers = team_robots  # fallback: use any robot
+
+        centre_robot = max(attackers, key=lambda r: r.x * attack_dir)
+
+        # Move that robot to the centre spot and face the opponent goal
+        centre_robot.x = 0.0
+        centre_robot.y = 0.0
+        centre_robot.heading = 0.0 if self.kickoff_team == 'blue' else np.pi
+        centre_robot.set_state(RobotState.IDLE)
+
+        self.kickoff_robot = centre_robot
+        if not self.headless:
+            print(f"  Kickoff: {self.kickoff_team} robot {centre_robot.id} at centre")
+
 
     # -----------------------------------------------------------------
     # GOAL DETECTION & TRACKBACK
@@ -550,6 +587,8 @@ class SoccerSimulator:
             self.set_piece_timer = SET_PIECE_WAIT_STEPS
             for robot in self.robots:
                 robot.set_state(RobotState.IDLE)
+            # Place the kicking team's attacker at the centre
+            self._setup_kickoff()
         return all_home
 
     # -----------------------------------------------------------------
@@ -636,12 +675,81 @@ class SoccerSimulator:
         """Handle set piece wait timer. Returns True when set piece ends."""
         self.set_piece_timer -= 1
         if self.set_piece_timer <= 0:
-            # Resume play — nearest robot on the set piece team gets to the ball
             self.game_state = GameState.PLAYING
             self.pass_count = 0
             self.last_passer_id = None
+
+            # For KICKOFF specifically: the centre robot immediately passes to a teammate
+            if self.kickoff_robot is not None:
+                kr = self.kickoff_robot
+                attack_dir = self._get_attack_direction(kr)
+                teammates = [
+                    r for r in self.robots
+                    if r.team == kr.team and r.id != kr.id
+                    and r.role != RobotRole.GOALKEEPER
+                    and not r.is_incapacitated()
+                ]
+                if teammates:
+                    # Target the nearest forward teammate
+                    target = max(teammates, key=lambda r: r.x * attack_dir)
+                    dx = target.x - self.ball.x
+                    dy = target.y - self.ball.y
+                    dist = np.sqrt(dx**2 + dy**2)
+                    if dist > 0:
+                        profile = self._get_profile_for(kr)
+                        intended_angle = np.arctan2(dy, dx)
+                        angle_error = np.random.normal(0, 0.06)
+                        actual_angle = intended_angle + angle_error
+                        pass_power = profile.pass_power + dist * 0.15
+                        self.ball.vx = np.cos(actual_angle) * pass_power
+                        self.ball.vy = np.sin(actual_angle) * pass_power
+                        self.ball.spin = np.random.uniform(-0.2, 0.2)
+                        self.last_touch_team = kr.team
+                        if kr.team == 'blue':
+                            self.total_passes_blue += 1
+                        else:
+                            self.total_passes_red += 1
+                        if not self.headless:
+                            print(f"  Kickoff pass: {kr.team} robot {kr.id} → robot {target.id}")
+                self.kickoff_robot = None  # Done with kickoff
             return True
         return False
+
+    # -----------------------------------------------------------------
+    # ROBOT-TO-ROBOT COLLISION RESOLUTION
+    # -----------------------------------------------------------------
+
+    def _resolve_collisions(self):
+        """Push apart any overlapping robots so they cannot occupy the same space."""
+        min_dist = ROBOT_COLLISION_RADIUS * 2  # minimum centre-to-centre distance
+        n = len(self.robots)
+        for i in range(n):
+            for j in range(i + 1, n):
+                ra = self.robots[i]
+                rb = self.robots[j]
+                dx = rb.x - ra.x
+                dy = rb.y - ra.y
+                dist = np.sqrt(dx**2 + dy**2)
+                if dist < min_dist and dist > 1e-6:
+                    # Overlap — push each robot half the overlap distance apart
+                    overlap = min_dist - dist
+                    nx = dx / dist  # unit vector from a to b
+                    ny = dy / dist
+                    ra.x -= nx * overlap / 2
+                    ra.y -= ny * overlap / 2
+                    rb.x += nx * overlap / 2
+                    rb.y += ny * overlap / 2
+                elif dist <= 1e-6:
+                    # Exactly on top of each other — nudge apart randomly
+                    angle = np.random.uniform(0, 2 * np.pi)
+                    ra.x -= np.cos(angle) * min_dist / 2
+                    ra.y -= np.sin(angle) * min_dist / 2
+                    rb.x += np.cos(angle) * min_dist / 2
+                    rb.y += np.sin(angle) * min_dist / 2
+                # Clamp both to pitch boundaries
+                for r in (ra, rb):
+                    r.x = np.clip(r.x, -PITCH_LENGTH / 2 + 0.1, PITCH_LENGTH / 2 - 0.1)
+                    r.y = np.clip(r.y, -PITCH_WIDTH / 2 + 0.1, PITCH_WIDTH / 2 - 0.1)
 
     # -----------------------------------------------------------------
     # LAST TOUCH TRACKING
@@ -783,6 +891,7 @@ class SoccerSimulator:
         # --- TRACKBACK STATE ---
         if self.game_state == GameState.TRACKBACK:
             self._update_trackback()
+            self._resolve_collisions()
             self.time += 1
             return
 
@@ -810,6 +919,9 @@ class SoccerSimulator:
             attack_dir = self._get_attack_direction(robot)
             action = decide_action_profiled(self, robot, profile, attack_dir)
             self.apply_action(robot, action)
+
+        # Resolve robot-to-robot collisions after all movement
+        self._resolve_collisions()
 
         # Update ball physics (no wall bounces — we handle out-of-bounds via set pieces)
         self.ball.update()
