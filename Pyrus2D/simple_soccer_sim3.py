@@ -22,6 +22,7 @@ import matplotlib.patches as patches
 from matplotlib.animation import FuncAnimation, PillowWriter
 from datetime import datetime
 from enum import Enum
+import matplotlib.transforms as mtransforms
 import time
 import os
 import json
@@ -170,7 +171,7 @@ DEFAULT_MATCH_DURATION = 300  # 5 minutes in seconds
 
 # Set piece constants
 SET_PIECE_WAIT_STEPS = 30     # ~1.5s wait before set piece resumes
-TRACKBACK_SPEED = 0.15        # Walk speed during trackback (slightly faster)
+TRACKBACK_SPEED = 0.0072      # Walk speed during trackback (~14.4 cm/s, slightly faster than normal 12 cm/s)
 TRACKBACK_THRESHOLD = 0.5     # Distance threshold to consider "at home"
 
 # =============================================================================
@@ -316,7 +317,7 @@ class Robot:
     def is_incapacitated(self):
         return self.state in [RobotState.FALLEN, RobotState.RECOVERING]
 
-    def move_toward(self, target_x, target_y, speed=0.1):
+    def move_toward(self, target_x, target_y, speed=0.006):
         """Move directly toward a point (used for trackback)."""
         dx = target_x - self.x
         dy = target_y - self.y
@@ -666,7 +667,7 @@ class SoccerSimulator:
 
         profile = self._get_profile_for(robot)
         attack_dir = self._get_attack_direction(robot)
-        walk_speed = 0.1 * profile.dash_power_multiplier
+        walk_speed = 0.006 * profile.dash_power_multiplier  # 12 cm/s real speed → 0.006 m/step (DT=0.05s)
 
         if action == 'turn_left':
             robot.heading += 0.15
@@ -1023,41 +1024,61 @@ class Visualizer:
         # Step simulation
         self.sim.step()
 
-        # Draw robots (bigger blobs for visibility)
+        # Draw robots — scaled to real dimensions: 311 mm × 275 mm
+        ROBOT_LENGTH = 0.311   # metres (front-back)
+        ROBOT_WIDTH  = 0.275   # metres (left-right)
+
         for robot in self.sim.robots:
             state_color = STATE_COLORS.get(robot.state, '#808080')
 
-            # Body — larger marker for visibility
-            self.ax_field.plot(robot.x, robot.y, 'o', color=robot.color,
-                               markersize=22, markeredgecolor=state_color,
-                               markeredgewidth=3.0)
+            # Robot body as a rotated rectangle centred on (robot.x, robot.y)
+            rect = patches.Rectangle(
+                (-ROBOT_LENGTH / 2, -ROBOT_WIDTH / 2),   # lower-left corner relative to centre
+                ROBOT_LENGTH, ROBOT_WIDTH,
+                linewidth=2.5,
+                edgecolor=state_color,
+                facecolor=robot.color,
+                alpha=0.85 if not robot.is_incapacitated() else 0.4,
+                zorder=3
+            )
+            # Rotate around robot centre then translate to world position
+            t = (mtransforms.Affine2D()
+                 .rotate(robot.heading)
+                 .translate(robot.x, robot.y)
+                 + self.ax_field.transData)
+            rect.set_transform(t)
+            self.ax_field.add_patch(rect)
 
-            # Heading arrow
-            dx = 0.35 * np.cos(robot.heading)
-            dy = 0.35 * np.sin(robot.heading)
+            # Heading arrow (short, from centre toward front)
+            dx = (ROBOT_LENGTH / 2 + 0.08) * np.cos(robot.heading)
+            dy = (ROBOT_LENGTH / 2 + 0.08) * np.sin(robot.heading)
             self.ax_field.arrow(robot.x, robot.y, dx, dy,
-                                head_width=0.12, head_length=0.08,
-                                fc=robot.color, ec='white', lw=0.5)
+                                head_width=0.09, head_length=0.07,
+                                fc='white', ec='white', lw=0.5, zorder=4)
 
             # Player number
             self.ax_field.text(robot.x, robot.y, str(robot.id),
                                ha='center', va='center', color='white',
-                               fontsize=8, fontweight='bold')
+                               fontsize=7, fontweight='bold', zorder=5)
 
-            # State label
+            # State label above robot
             abbrev = STATE_ABBREV.get(robot.state, '?')
-            self.ax_field.text(robot.x, robot.y + 0.4, abbrev,
+            self.ax_field.text(robot.x, robot.y + ROBOT_WIDTH / 2 + 0.12, abbrev,
                                ha='center', va='bottom', color=state_color,
-                               fontsize=7, fontweight='bold',
+                               fontsize=7, fontweight='bold', zorder=5,
                                bbox=dict(boxstyle='round,pad=0.1',
                                          facecolor='black', alpha=0.7))
 
-        # Draw ball
+        # Draw ball — real diameter 14 cm → radius 0.07 m
+        BALL_RADIUS = 0.07   # metres
         ball_speed = np.sqrt(self.sim.ball.vx**2 + self.sim.ball.vy**2)
         ball_alpha = min(1.0, 0.5 + ball_speed * 0.2)
-        self.ax_field.plot(self.sim.ball.x, self.sim.ball.y, 'o',
-                           color='white', markersize=10,
-                           markeredgecolor='black', markeredgewidth=2, alpha=ball_alpha)
+        ball_patch = patches.Circle(
+            (self.sim.ball.x, self.sim.ball.y), BALL_RADIUS,
+            linewidth=1.5, edgecolor='black', facecolor='white',
+            alpha=ball_alpha, zorder=6
+        )
+        self.ax_field.add_patch(ball_patch)
 
         # Ball velocity vector
         if ball_speed > 0.1:
