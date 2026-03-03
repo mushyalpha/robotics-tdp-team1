@@ -34,7 +34,10 @@ def load_results(results_dir):
         with open(filepath, 'r') as f:
             data = json.load(f)
 
-        config_key = f"{data['blue_profile']}_vs_{data['red_profile']}"
+        mode = data.get('behavior_mode', 'adaptive')
+        blue_side = data.get('blue_personality') or data.get('blue_profile', 'unknown')
+        red_side = data.get('red_personality') or data.get('red_profile', 'unknown')
+        config_key = f"{mode}:{blue_side}_vs_{red_side}"
         if config_key not in configs:
             configs[config_key] = []
         configs[config_key].append(data)
@@ -49,12 +52,19 @@ def compute_stats(matches):
 
     metrics = [
         'blue_goals', 'red_goals',
+        'falls_per_game',
         'blue_possession_pct', 'red_possession_pct',
-        'blue_shots', 'red_shots',
-        'blue_passes', 'red_passes',
+        'turnovers_per_min',
+        'blue_net_territory_gain', 'red_net_territory_gain', 'net_territory_gain_balance',
         'blue_danger_zone_pct', 'red_danger_zone_pct',
-        'blue_falls', 'red_falls',
-        'blue_total_distance', 'red_total_distance',
+        'blue_danger_entries', 'red_danger_entries',
+        'danger_entry_balance', 'danger_zone_balance',
+        'blue_shot_quality_sum', 'red_shot_quality_sum',
+        'blue_avg_shot_quality', 'red_avg_shot_quality', 'shot_quality_balance',
+        'blue_avg_hull_area', 'red_avg_hull_area', 'spacing_area_balance',
+        'blue_avg_centroid_x', 'blue_avg_centroid_y',
+        'red_avg_centroid_x', 'red_avg_centroid_y',
+        'spacing_centroid_progress_balance',
     ]
 
     stats = {}
@@ -94,17 +104,20 @@ def print_comparison(configs):
         print(f"  Win Rate:  Blue {stats['blue_win_rate']}%  |  Red {stats['red_win_rate']}%  |  Draw {stats['draw_rate']}%")
         print(f"  Goals:     Blue {stats['blue_goals']['mean']:.1f}±{stats['blue_goals']['std']:.1f}  |  "
               f"Red {stats['red_goals']['mean']:.1f}±{stats['red_goals']['std']:.1f}")
+        print(f"  Falls:     {stats['falls_per_game']['mean']:.2f}/game")
         print(f"  Possess:   Blue {stats['blue_possession_pct']['mean']:.1f}%  |  "
               f"Red {stats['red_possession_pct']['mean']:.1f}%")
-        print(f"  Shots:     Blue {stats['blue_shots']['mean']:.1f}±{stats['blue_shots']['std']:.1f}  |  "
-              f"Red {stats['red_shots']['mean']:.1f}±{stats['red_shots']['std']:.1f}")
-        print(f"  Passes:    Blue {stats['blue_passes']['mean']:.1f}±{stats['blue_passes']['std']:.1f}  |  "
-              f"Red {stats['red_passes']['mean']:.1f}±{stats['red_passes']['std']:.1f}")
+        print(f"  Turnovers: {stats['turnovers_per_min']['mean']:.2f}/min")
+        print(f"  Territory: Blue {stats['blue_net_territory_gain']['mean']:.2f}m/poss  |  "
+              f"Red {stats['red_net_territory_gain']['mean']:.2f}m/poss")
         print(f"  Danger%:   Blue {stats['blue_danger_zone_pct']['mean']:.1f}%  |  "
               f"Red {stats['red_danger_zone_pct']['mean']:.1f}%")
-        print(f"  Falls:     Blue {stats['blue_falls']['mean']:.1f}  |  Red {stats['red_falls']['mean']:.1f}")
-        print(f"  Distance:  Blue {stats['blue_total_distance']['mean']:.0f}m  |  "
-              f"Red {stats['red_total_distance']['mean']:.0f}m")
+        print(f"  DangerEnt: Blue {stats['blue_danger_entries']['mean']:.1f}  |  "
+              f"Red {stats['red_danger_entries']['mean']:.1f}")
+        print(f"  ShotQual:  Blue {stats['blue_avg_shot_quality']['mean']:.3f}  |  "
+              f"Red {stats['red_avg_shot_quality']['mean']:.3f}")
+        print(f"  SpacingA:  Blue {stats['blue_avg_hull_area']['mean']:.2f}m²  |  "
+              f"Red {stats['red_avg_hull_area']['mean']:.2f}m²")
 
 
 def generate_charts(configs, output_dir):
@@ -135,21 +148,21 @@ def generate_charts(configs, output_dir):
     fig.savefig(os.path.join(output_dir, 'win_rates.png'), dpi=150)
     plt.close(fig)
 
-    # --- Chart 2: Goals (mean ± std) ---
+    # --- Chart 2: Territory gain (mean ± std) ---
     fig, ax = plt.subplots(figsize=(10, 5))
-    blue_goals = [s['blue_goals']['mean'] for s in stats_list]
-    blue_std = [s['blue_goals']['std'] for s in stats_list]
-    red_goals = [s['red_goals']['mean'] for s in stats_list]
-    red_std = [s['red_goals']['std'] for s in stats_list]
-    ax.bar(x - 0.15, blue_goals, 0.3, yerr=blue_std, label='Blue', color='#3366FF', alpha=0.8, capsize=3)
-    ax.bar(x + 0.15, red_goals, 0.3, yerr=red_std, label='Red', color='#FF3333', alpha=0.8, capsize=3)
-    ax.set_ylabel('Goals')
-    ax.set_title('Average Goals per Match')
+    blue_terr = [s['blue_net_territory_gain']['mean'] for s in stats_list]
+    blue_std = [s['blue_net_territory_gain']['std'] for s in stats_list]
+    red_terr = [s['red_net_territory_gain']['mean'] for s in stats_list]
+    red_std = [s['red_net_territory_gain']['std'] for s in stats_list]
+    ax.bar(x - 0.15, blue_terr, 0.3, yerr=blue_std, label='Blue', color='#3366FF', alpha=0.8, capsize=3)
+    ax.bar(x + 0.15, red_terr, 0.3, yerr=red_std, label='Red', color='#FF3333', alpha=0.8, capsize=3)
+    ax.set_ylabel('Net Territory Gain (m/poss)')
+    ax.set_title('Average Net Territory Gain per Possession')
     ax.set_xticks(x)
     ax.set_xticklabels(config_names, rotation=15, ha='right', fontsize=8)
     ax.legend()
     fig.tight_layout()
-    fig.savefig(os.path.join(output_dir, 'goals.png'), dpi=150)
+    fig.savefig(os.path.join(output_dir, 'territory_gain.png'), dpi=150)
     plt.close(fig)
 
     # --- Chart 3: Possession ---
@@ -167,29 +180,25 @@ def generate_charts(configs, output_dir):
     fig.savefig(os.path.join(output_dir, 'possession.png'), dpi=150)
     plt.close(fig)
 
-    # --- Chart 4: Shots vs Passes ---
+    # --- Chart 4: Danger balance vs spacing balance ---
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
     ax = axes[0]
-    ax.bar(x - 0.15, [s['blue_shots']['mean'] for s in stats_list], 0.3, label='Blue', color='#3366FF')
-    ax.bar(x + 0.15, [s['red_shots']['mean'] for s in stats_list], 0.3, label='Red', color='#FF3333')
-    ax.set_ylabel('Shots')
-    ax.set_title('Average Shots')
+    ax.bar(x, [s['danger_zone_balance']['mean'] for s in stats_list], 0.5, color='#7c3aed')
+    ax.set_ylabel('Danger Zone Balance (%)')
+    ax.set_title('Danger Zone Balance (Blue - Red)')
     ax.set_xticks(x)
     ax.set_xticklabels(config_names, rotation=15, ha='right', fontsize=8)
-    ax.legend()
 
     ax = axes[1]
-    ax.bar(x - 0.15, [s['blue_passes']['mean'] for s in stats_list], 0.3, label='Blue', color='#3366FF')
-    ax.bar(x + 0.15, [s['red_passes']['mean'] for s in stats_list], 0.3, label='Red', color='#FF3333')
-    ax.set_ylabel('Passes')
-    ax.set_title('Average Passes')
+    ax.bar(x, [s['spacing_area_balance']['mean'] for s in stats_list], 0.5, color='#0ea5e9')
+    ax.set_ylabel('Spacing Area Balance (m²)')
+    ax.set_title('Spacing Area Balance (Blue - Red)')
     ax.set_xticks(x)
     ax.set_xticklabels(config_names, rotation=15, ha='right', fontsize=8)
-    ax.legend()
 
     fig.tight_layout()
-    fig.savefig(os.path.join(output_dir, 'shots_passes.png'), dpi=150)
+    fig.savefig(os.path.join(output_dir, 'danger_spacing_balance.png'), dpi=150)
     plt.close(fig)
 
     print(f"\n✓ Charts saved to {output_dir}/")
@@ -203,10 +212,20 @@ def export_csv(configs, output_path):
         row = {'config': config_name, 'matches': stats['total_matches']}
         for key in ['blue_win_rate', 'red_win_rate', 'draw_rate']:
             row[key] = stats[key]
-        for key in ['blue_goals', 'red_goals', 'blue_possession_pct', 'red_possession_pct',
-                     'blue_shots', 'red_shots', 'blue_passes', 'red_passes',
+        for key in ['blue_goals', 'red_goals', 'falls_per_game', 'blue_possession_pct', 'red_possession_pct',
+                     'turnovers_per_min',
+                     'blue_net_territory_gain', 'red_net_territory_gain', 'net_territory_gain_balance',
                      'blue_danger_zone_pct', 'red_danger_zone_pct',
-                     'blue_falls', 'red_falls', 'blue_total_distance', 'red_total_distance']:
+                     'blue_danger_entries', 'red_danger_entries',
+                     'danger_entry_balance', 'danger_zone_balance',
+                     'blue_shot_quality_sum', 'red_shot_quality_sum',
+                     'blue_avg_shot_quality', 'red_avg_shot_quality', 'shot_quality_balance']:
+            row[f"{key}_mean"] = stats[key]['mean']
+            row[f"{key}_std"] = stats[key]['std']
+        for key in ['blue_avg_hull_area', 'red_avg_hull_area', 'spacing_area_balance',
+                     'blue_avg_centroid_x', 'blue_avg_centroid_y',
+                     'red_avg_centroid_x', 'red_avg_centroid_y',
+                     'spacing_centroid_progress_balance']:
             row[f"{key}_mean"] = stats[key]['mean']
             row[f"{key}_std"] = stats[key]['std']
         rows.append(row)
@@ -246,3 +265,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

@@ -16,6 +16,7 @@ from behavior_profile import BehaviorProfile
 PITCH_LENGTH = 9.0
 PITCH_WIDTH = 6.0
 GOAL_WIDTH = 2.6
+MIN_PASS_SCORE = 1.4
 
 
 def decide_action_profiled(sim, robot, profile: BehaviorProfile, attack_direction: int):
@@ -89,10 +90,8 @@ def _decide_with_ball(sim, robot, profile, attack_direction, teammates):
     pass_count = getattr(sim, 'pass_count', 0)
     met_min_passes = pass_count >= profile.min_passes_before_shot
     
-    # Shoot-or-pass decision
-    wants_to_shoot = np.random.random() < profile.shoot_over_pass_bias
-    
-    if in_shooting_range and good_angle and met_min_passes and wants_to_shoot:
+    # Shoot-first policy: if shot conditions are met, shoot immediately.
+    if in_shooting_range and good_angle and met_min_passes:
         # SHOOT!
         if hasattr(robot, 'set_state'):
             from simple_soccer_sim3 import RobotState
@@ -106,7 +105,7 @@ def _decide_with_ball(sim, robot, profile, attack_direction, teammates):
         sim, robot, teammates, profile, attack_direction
     )
     
-    if best_pass_target is not None and best_pass_score > 0.5:
+    if best_pass_target is not None and best_pass_score > MIN_PASS_SCORE:
         # PASS
         if hasattr(robot, 'set_state'):
             from simple_soccer_sim3 import RobotState

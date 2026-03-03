@@ -172,6 +172,12 @@ GOAL_AREA_WIDTH = 3.0
 # Timing
 DT = 0.05           # seconds per step (50ms, matching animation interval)
 DEFAULT_MATCH_DURATION = 300  # 5 minutes in seconds
+TURN_RATE_RAD_PER_SEC = 0.5
+TURN_STEP_RAD = TURN_RATE_RAD_PER_SEC * DT
+MAX_PLAYER_SPEED_M_PER_S = 0.12
+MAX_PLAYER_SPEED_M_PER_STEP = MAX_PLAYER_SPEED_M_PER_S * DT
+RECOVERY_DURATION_SECONDS = 26.0
+RECOVERY_DURATION_STEPS = int(RECOVERY_DURATION_SECONDS / DT)
 
 # Set piece constants
 SET_PIECE_WAIT_STEPS = 30     # ~1.5s wait before set piece resumes
@@ -181,6 +187,8 @@ TRACKBACK_THRESHOLD = 0.5     # Distance threshold to consider "at home"
 # Robot collision — approximate each robot as a circle for overlap resolution
 # Real dimensions: 311 mm × 275 mm → average radius ≈ (0.311 + 0.275) / 4 ≈ 0.147 m
 ROBOT_COLLISION_RADIUS = 0.147  # metres
+COLLISION_FALL_MIN_OVERLAP = 0.04  # m, ignore light contacts
+COLLISION_FALL_MAX_PROB = 0.35     # cap fall chance from a single collision
 
 # =============================================================================
 # ENUMS
@@ -262,9 +270,9 @@ class Robot:
         self.state_duration = 0
 
         # Fall/recovery
-        self.fall_probability = 0.002
+        self.fall_probability = 0.0
         self.recovery_time = 0
-        self.recovery_duration = 30
+        self.recovery_duration = RECOVERY_DURATION_STEPS
 
         # Action timing
         self.action_timer = 0
@@ -298,6 +306,8 @@ class Robot:
         return bearing
 
     def simulate_fall(self, profile):
+        if self.fall_probability <= 0.0:
+            return False
         if self.state not in [RobotState.FALLEN, RobotState.RECOVERING]:
             fall_chance = self.fall_probability * profile.fall_probability_mult
             if self.state in [RobotState.KICKING, RobotState.PASSING]:
@@ -417,7 +427,7 @@ class Ball:
 class SoccerSimulator:
     def __init__(self, blue_personality='aggressive', red_personality='conservative',
                  enable_falls=True, match_duration=DEFAULT_MATCH_DURATION,
-                 headless=False):
+                 headless=False, adaptive=True):
         """
         Args:
             blue_personality: 'aggressive' or 'conservative' — sets HTSM switching table
@@ -425,8 +435,11 @@ class SoccerSimulator:
             enable_falls: Toggle fall simulation
             match_duration: Match length in seconds
             headless: If True, skip all print output
+            adaptive: If False, disable HTSM updates (static behavior for full match)
         """
         self.headless = headless
+        self.adaptive = bool(adaptive)
+        self.behavior_mode = 'adaptive' if self.adaptive else 'static'
 
         # --- Tactical State Machines (one per team) ---
         self.blue_personality = blue_personality
@@ -740,6 +753,21 @@ class SoccerSimulator:
     # ROBOT-TO-ROBOT COLLISION RESOLUTION
     # -----------------------------------------------------------------
 
+    def _maybe_fall_from_collision(self, robot, overlap, min_dist):
+        """Apply collision-induced fall with probability based on overlap severity."""
+        if robot.is_incapacitated() or overlap < COLLISION_FALL_MIN_OVERLAP:
+            return False
+
+        severity = (overlap - COLLISION_FALL_MIN_OVERLAP) / max(1e-9, (min_dist - COLLISION_FALL_MIN_OVERLAP))
+        severity = float(np.clip(severity, 0.0, 1.0))
+        fall_prob = COLLISION_FALL_MAX_PROB * severity
+
+        if np.random.random() < fall_prob:
+            robot.set_state(RobotState.FALLEN)
+            robot.recovery_time = robot.recovery_duration
+            return True
+        return False
+
     def _resolve_collisions(self):
         """Push apart any overlapping robots so they cannot occupy the same space."""
         min_dist = ROBOT_COLLISION_RADIUS * 2  # minimum centre-to-centre distance
@@ -762,6 +790,7 @@ class SoccerSimulator:
                     rb.y += ny * overlap / 2
                 elif dist <= 1e-6:
                     # Exactly on top of each other — nudge apart randomly
+                    overlap = min_dist
                     angle = np.random.uniform(0, 2 * np.pi)
                     ra.x -= np.cos(angle) * min_dist / 2
                     ra.y -= np.sin(angle) * min_dist / 2
@@ -771,6 +800,11 @@ class SoccerSimulator:
                 for r in (ra, rb):
                     r.x = np.clip(r.x, -PITCH_LENGTH / 2 + 0.1, PITCH_LENGTH / 2 - 0.1)
                     r.y = np.clip(r.y, -PITCH_WIDTH / 2 + 0.1, PITCH_WIDTH / 2 - 0.1)
+
+                # Collision consequence: overlap may knock players down
+                if self.enable_falls and dist < min_dist:
+                    self._maybe_fall_from_collision(ra, overlap, min_dist)
+                    self._maybe_fall_from_collision(rb, overlap, min_dist)
 
     # -----------------------------------------------------------------
     # LAST TOUCH TRACKING
@@ -796,12 +830,15 @@ class SoccerSimulator:
 
         profile = self._get_profile_for(robot)
         attack_dir = self._get_attack_direction(robot)
-        walk_speed = 0.006 * profile.dash_power_multiplier  # 12 cm/s real speed → 0.006 m/step (DT=0.05s)
+        walk_speed = min(
+            MAX_PLAYER_SPEED_M_PER_STEP,
+            MAX_PLAYER_SPEED_M_PER_STEP * profile.dash_power_multiplier,
+        )
 
         if action == 'turn_left':
-            robot.heading += 0.15
+            robot.heading += TURN_STEP_RAD
         elif action == 'turn_right':
-            robot.heading -= 0.15
+            robot.heading -= TURN_STEP_RAD
         elif action == 'walk_forward':
             robot.x += walk_speed * np.cos(robot.heading)
             robot.y += walk_speed * np.sin(robot.heading)
@@ -828,9 +865,15 @@ class SoccerSimulator:
                 behind_offset = 0.25
                 robot.x = self.ball.x - (dx_to_goal / dist_to_goal) * behind_offset
                 robot.y = self.ball.y - (dy_to_goal / dist_to_goal) * behind_offset
-                robot.heading = np.arctan2(dy_to_goal, dx_to_goal)
-
                 intended_angle = np.arctan2(dy_to_goal, dx_to_goal)
+
+                # Enforce finite turn speed before shooting
+                angle_diff = (intended_angle - robot.heading + np.pi) % (2 * np.pi) - np.pi
+                if abs(angle_diff) > TURN_STEP_RAD:
+                    robot.heading += np.sign(angle_diff) * TURN_STEP_RAD
+                    return
+
+                robot.heading = intended_angle
                 angle_error = np.random.normal(0, profile.kick_accuracy + dist_to_goal * 0.02)
                 actual_angle = intended_angle + angle_error
 
@@ -878,9 +921,15 @@ class SoccerSimulator:
                     behind_offset = 0.2
                     robot.x = self.ball.x - (dx / dist) * behind_offset
                     robot.y = self.ball.y - (dy / dist) * behind_offset
-                    robot.heading = np.arctan2(dy, dx)
-
                     intended_angle = np.arctan2(dy, dx)
+
+                    # Enforce finite turn speed before passing
+                    angle_diff = (intended_angle - robot.heading + np.pi) % (2 * np.pi) - np.pi
+                    if abs(angle_diff) > TURN_STEP_RAD:
+                        robot.heading += np.sign(angle_diff) * TURN_STEP_RAD
+                        return
+
+                    robot.heading = intended_angle
                     angle_error = np.random.normal(0, 0.08 + dist * 0.015)
                     actual_angle = intended_angle + angle_error
 
@@ -926,7 +975,8 @@ class SoccerSimulator:
         # --- PLAYING STATE ---
 
         # HTSM update: evaluate tactics, drift alpha, generate profiles
-        self._update_tactics()
+        if self.adaptive:
+            self._update_tactics()
 
         # Update falls
         if self.enable_falls:
