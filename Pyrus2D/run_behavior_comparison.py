@@ -12,14 +12,11 @@ Example:
     python run_behavior_comparison.py --matches 20 --duration 300 --workers 6
     python metrics_analyzer.py --input behavior_results --output analysis
 
-Configurations (7 total):
-  1. aggressive vs baseline  (fixed baseline test)
-  2. conservative vs baseline (fixed baseline test)
-  3. baseline vs baseline    (control)
-  4. aggressive vs aggressive (mirror match)
-  5. conservative vs conservative (mirror match)
-  6. aggressive vs conservative  (key: aggressive beats conservative?)
-  7. conservative vs aggressive  (reverse: eliminate side bias)
+Configurations (4 total):
+    1. aggressive vs aggressive (mirror match)
+    2. conservative vs conservative (mirror match)
+    3. aggressive vs conservative
+    4. conservative vs aggressive (reverse to eliminate side bias)
 """
 
 import os
@@ -28,7 +25,6 @@ import json
 import argparse
 import time
 import multiprocessing as mp
-from functools import partial
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -37,9 +33,6 @@ from metrics_collector import MetricsCollector
 
 
 CONFIGURATIONS = [
-    ('aggressive',   'baseline'),
-    ('conservative', 'baseline'),
-    ('baseline',     'baseline'),
     ('aggressive',   'aggressive'),
     ('conservative', 'conservative'),
     ('aggressive',   'conservative'),
@@ -49,15 +42,17 @@ CONFIGURATIONS = [
 
 def _run_one(args_tuple):
     """Worker function (must be top-level for multiprocessing)."""
-    blue, red, match_duration, enable_falls, output_dir, match_idx = args_tuple
+    blue, red, match_duration, enable_falls, mode_label, adaptive, output_dir, match_idx = args_tuple
     config_name = f"{blue}_vs_{red}"
+    run_name = f"{mode_label}:{config_name}"
     try:
         sim = SoccerSimulator(
-            blue_profile=blue,
-            red_profile=red,
+            blue_personality=blue,
+            red_personality=red,
             enable_falls=enable_falls,
             match_duration=match_duration,
             headless=True,
+            adaptive=adaptive,
         )
         collector = MetricsCollector(sim)
 
@@ -67,23 +62,23 @@ def _run_one(args_tuple):
 
         summary = collector.get_summary()
 
-        filename = f"{config_name}_match{match_idx:03d}.json"
+        filename = f"{mode_label}_{config_name}_match{match_idx:03d}.json"
         filepath = os.path.join(output_dir, filename)
         with open(filepath, 'w') as f:
             json.dump(summary, f, indent=2)
 
-        return (config_name, match_idx, True,
+        return (run_name, match_idx, True,
                 summary['blue_goals'], summary['red_goals'], None)
 
     except Exception as e:
-        return (config_name, match_idx, False, 0, 0, str(e))
+        return (run_name, match_idx, False, 0, 0, str(e))
 
 
 def main():
     parser = argparse.ArgumentParser(description='Run parallel behavior comparison matches')
     parser.add_argument('--matches', '-m', type=int, default=20,
                         help='Matches per configuration (default: 20). '
-                             '7 configs × 20 = 140 total, ~30s with 6 workers.')
+                             '4 configs × 20 = 80 total, ~20s with 6 workers.')
     parser.add_argument('--duration', '-d', type=int, default=300,
                         help='Match duration in seconds (default: 300 = 5 min). '
                              'Each match runs in ~1s headless regardless of duration.')
@@ -95,6 +90,9 @@ def main():
                              f'{min(6, mp.cpu_count())})')
     parser.add_argument('--no-falls', action='store_true',
                         help='Disable fall simulation (faster, more deterministic)')
+    parser.add_argument('--mode', choices=['adaptive', 'static', 'both'], default='both',
+                        help='Behavior update mode (default: both). '
+                            'static disables in-match HTSM updates.')
     parser.add_argument('--configs', '-c', nargs='*',
                         help='Run only specific configs, e.g. aggressive_vs_conservative')
     args = parser.parse_args()
@@ -112,7 +110,8 @@ def main():
             else:
                 print(f"  Warning: skipping invalid config '{c}' (use format 'blue_vs_red')")
 
-    total_matches = len(configs) * args.matches
+    mode_list = ['adaptive', 'static'] if args.mode == 'both' else [args.mode]
+    total_matches = len(configs) * args.matches * len(mode_list)
     workers = min(args.workers, total_matches)
 
     print("=" * 70)
@@ -124,6 +123,7 @@ def main():
     print(f"  Match duration : {args.duration}s  "
           f"(~{args.duration/60:.1f} sim-minutes each)")
     print(f"  Worker threads : {workers}")
+    print(f"  Mode           : {','.join(m.upper() for m in mode_list)}")
     print(f"  Falls          : {'OFF' if args.no_falls else 'ON'}")
     print(f"  Output dir     : {args.output}/")
     print(f"  Est. wall time : ~{max(1, total_matches // workers)}s")
@@ -131,10 +131,13 @@ def main():
 
     # Build work items
     work_items = []
-    for blue, red in configs:
-        for i in range(args.matches):
-            work_items.append((blue, red, args.duration,
-                               not args.no_falls, args.output, i + 1))
+    for mode_label in mode_list:
+        adaptive = (mode_label == 'adaptive')
+        for blue, red in configs:
+            for i in range(args.matches):
+                work_items.append((blue, red, args.duration,
+                                   not args.no_falls, mode_label, adaptive,
+                                   args.output, i + 1))
 
     start_time = time.time()
     completed = 0
