@@ -1,5 +1,5 @@
 """
-Simple Soccer Simulation VERSION 3 — Aggressive vs Conservative
+Simple Soccer Simulation VERSION 3 — Unified Tactical Architecture
 ================================================================
 
 Full 2D soccer simulation with:
@@ -29,6 +29,10 @@ import json
 import sys
 
 from behavior_profile import BehaviorProfile, BASELINE, AGGRESSIVE, CONSERVATIVE, get_profile
+from tactical_engine import (
+    TacticalStateMachine, Tactic, TACTIC_COLORS,
+    compute_formation_label,
+)
 from decision_profiled import decide_action_profiled, _get_home_position
 
 # =============================================================================
@@ -411,28 +415,28 @@ class Ball:
 # =============================================================================
 
 class SoccerSimulator:
-    def __init__(self, blue_profile='baseline', red_profile='baseline',
+    def __init__(self, blue_personality='aggressive', red_personality='conservative',
                  enable_falls=True, match_duration=DEFAULT_MATCH_DURATION,
                  headless=False):
         """
         Args:
-            blue_profile: Name or BehaviorProfile for blue team
-            red_profile: Name or BehaviorProfile for red team
+            blue_personality: 'aggressive' or 'conservative' — sets HTSM switching table
+            red_personality:  'aggressive' or 'conservative'
             enable_falls: Toggle fall simulation
             match_duration: Match length in seconds
             headless: If True, skip all print output
         """
         self.headless = headless
 
-        # Profiles
-        if isinstance(blue_profile, str):
-            self.blue_profile = get_profile(blue_profile)
-        else:
-            self.blue_profile = blue_profile
-        if isinstance(red_profile, str):
-            self.red_profile = get_profile(red_profile)
-        else:
-            self.red_profile = red_profile
+        # --- Tactical State Machines (one per team) ---
+        self.blue_personality = blue_personality
+        self.red_personality = red_personality
+        self.blue_htsm = TacticalStateMachine(blue_personality)
+        self.red_htsm = TacticalStateMachine(red_personality)
+
+        # Live profiles — updated every step by the HTSM's current α
+        self.blue_profile = self.blue_htsm.get_profile()
+        self.red_profile = self.red_htsm.get_profile()
 
         # Ball
         self.ball = Ball(0, 0)
@@ -457,6 +461,7 @@ class SoccerSimulator:
         self.kickoff_team = 'blue'  # Which team takes kick-off
         self.set_piece_team = None  # Which team takes the set piece
         self.last_touch_team = None  # Last team to touch the ball
+        self._prev_touch_team = None  # For ball-recovery detection
 
         # Passing stats (per team)
         self.pass_count = 0
@@ -470,6 +475,9 @@ class SoccerSimulator:
 
         # Metrics logging
         self.step_log = []
+
+        # Event log (for display)
+        self.event_log = []
 
         # Position the first kickoff
         self._setup_kickoff()
@@ -546,6 +554,9 @@ class SoccerSimulator:
             self.last_touch_team = 'blue'
             if not self.headless:
                 print(f"\n⚽ GOAL! Blue scores! (Blue {self.blue_goals} - {self.red_goals} Red)")
+            self.blue_htsm.reset_lock_on_goal()
+            self.red_htsm.reset_lock_on_goal()
+            self._add_event(f"⚽ BLUE GOAL ({self.blue_goals}-{self.red_goals})")
             self._start_trackback('red')  # Red gets kick-off
             return True
 
@@ -555,10 +566,20 @@ class SoccerSimulator:
             self.last_touch_team = 'red'
             if not self.headless:
                 print(f"\n⚽ GOAL! Red scores! (Blue {self.blue_goals} - {self.red_goals} Red)")
+            self.blue_htsm.reset_lock_on_goal()
+            self.red_htsm.reset_lock_on_goal()
+            self._add_event(f"⚽ RED GOAL ({self.blue_goals}-{self.red_goals})")
             self._start_trackback('blue')  # Blue gets kick-off
             return True
 
         return False
+
+    def _add_event(self, msg):
+        """Add an event to the display log."""
+        time_str = self.get_elapsed_time_str()
+        self.event_log.insert(0, f"[{time_str}] {msg}")
+        if len(self.event_log) > 8:
+            self.event_log.pop()
 
     def _start_trackback(self, kickoff_team):
         """Begin trackback: all players jog back to home positions."""
@@ -903,6 +924,10 @@ class SoccerSimulator:
             return
 
         # --- PLAYING STATE ---
+
+        # HTSM update: evaluate tactics, drift alpha, generate profiles
+        self._update_tactics()
+
         # Update falls
         if self.enable_falls:
             for robot in self.robots:
@@ -940,6 +965,56 @@ class SoccerSimulator:
         self.time += 1
 
     # -----------------------------------------------------------------
+    # TACTICAL ENGINE INTEGRATION
+    # -----------------------------------------------------------------
+
+    def _update_tactics(self):
+        """Update both teams' HTSM — evaluate switching rules, drift α."""
+        time_remaining = max(0, self.match_duration - self.time * DT)
+
+        # Ball recovery detection
+        blue_recovered_own_half = (
+            self.last_touch_team == 'blue'
+            and self._prev_touch_team == 'red'
+            and self.ball.x < 0
+        )
+        red_recovered_own_half = (
+            self.last_touch_team == 'red'
+            and self._prev_touch_team == 'blue'
+            and self.ball.x > 0
+        )
+        self._prev_touch_team = self.last_touch_team
+
+        blue_score_diff = self.blue_goals - self.red_goals
+        red_score_diff = self.red_goals - self.blue_goals
+
+        old_blue_tactic = self.blue_htsm.current_tactic
+        old_red_tactic = self.red_htsm.current_tactic
+
+        self.blue_htsm.update(
+            step=self.time, score_diff=blue_score_diff,
+            time_remaining=time_remaining,
+            ball_zone='opp_half' if self.ball.x > 0 else 'own_half',
+            possession_team=self.last_touch_team, own_team='blue',
+            ball_recovered_own_half=blue_recovered_own_half,
+        )
+        self.red_htsm.update(
+            step=self.time, score_diff=red_score_diff,
+            time_remaining=time_remaining,
+            ball_zone='opp_half' if self.ball.x < 0 else 'own_half',
+            possession_team=self.last_touch_team, own_team='red',
+            ball_recovered_own_half=red_recovered_own_half,
+        )
+
+        self.blue_profile = self.blue_htsm.get_profile()
+        self.red_profile = self.red_htsm.get_profile()
+
+        if self.blue_htsm.current_tactic != old_blue_tactic:
+            self._add_event(f"BLUE → {self.blue_htsm.current_tactic.value}")
+        if self.red_htsm.current_tactic != old_red_tactic:
+            self._add_event(f"RED → {self.red_htsm.current_tactic.value}")
+
+    # -----------------------------------------------------------------
     # MATCH RUNNER (HEADLESS)
     # -----------------------------------------------------------------
 
@@ -961,8 +1036,10 @@ class SoccerSimulator:
             winner = 'draw'
 
         return {
-            'blue_profile': self.blue_profile.name,
-            'red_profile': self.red_profile.name,
+            'blue_personality': self.blue_personality,
+            'red_personality': self.red_personality,
+            'blue_final_tactic': self.blue_htsm.current_tactic.value,
+            'red_final_tactic': self.red_htsm.current_tactic.value,
             'blue_goals': self.blue_goals,
             'red_goals': self.red_goals,
             'winner': winner,
@@ -970,6 +1047,8 @@ class SoccerSimulator:
             'total_steps': self.time,
             'total_passes_blue': self.total_passes_blue,
             'total_passes_red': self.total_passes_red,
+            'blue_tactic_switches': len(self.blue_htsm.events),
+            'red_tactic_switches': len(self.red_htsm.events),
         }
 
     def get_elapsed_time_str(self):
@@ -992,8 +1071,9 @@ class SoccerSimulator:
 # =============================================================================
 
 class Visualizer:
-    def __init__(self, simulator):
+    def __init__(self, simulator, frame_interval=10):
         self.sim = simulator
+        self.frame_interval = frame_interval  # ms between frames (lower = faster)
         self.fig = plt.figure(figsize=(15, 9))
 
         # Main field
@@ -1068,66 +1148,102 @@ class Visualizer:
         self.ax_status.axis('off')
         self.ax_status.set_xlim(0, 1)
         self.ax_status.set_ylim(0, 1)
+        sim = self.sim
 
         # Scoreboard
-        self.ax_status.text(0.5, 0.97, 'SCOREBOARD', ha='center', va='top',
-                            fontsize=13, fontweight='bold', color='white',
+        self.ax_status.text(0.5, 0.98, 'SCOREBOARD', ha='center', va='top',
+                            fontsize=12, fontweight='bold', color='white',
                             bbox=dict(boxstyle='round', facecolor='#333', edgecolor='white'))
+        score_text = f"{sim.blue_goals}  -  {sim.red_goals}"
+        self.ax_status.text(0.5, 0.92, score_text, ha='center', va='top',
+                            fontsize=20, fontweight='bold', color='white')
+        self.ax_status.text(0.15, 0.92, 'BLUE', ha='center', va='top',
+                            fontsize=9, color='#3366FF', fontweight='bold')
+        self.ax_status.text(0.85, 0.92, 'RED', ha='center', va='top',
+                            fontsize=9, color='#FF3333', fontweight='bold')
 
-        score_text = f"{self.sim.blue_goals}  -  {self.sim.red_goals}"
-        self.ax_status.text(0.5, 0.91, score_text, ha='center', va='top',
-                            fontsize=22, fontweight='bold', color='white')
-
-        self.ax_status.text(0.15, 0.91, 'BLUE', ha='center', va='top',
-                            fontsize=10, color='#3366FF', fontweight='bold')
-        self.ax_status.text(0.85, 0.91, 'RED', ha='center', va='top',
-                            fontsize=10, color='#FF3333', fontweight='bold')
-
-        # Timer
-        time_str = self.sim.get_elapsed_time_str()
-        remain_str = self.sim.get_remaining_time_str()
-        self.ax_status.text(0.5, 0.84, f"TIME: {time_str}  (rem: {remain_str})", ha='center',
-                            fontsize=10, color='#CCCCCC')
+        # Timer (countdown only)
+        remain_str = sim.get_remaining_time_str()
+        self.ax_status.text(0.5, 0.86, f"Remaining: {remain_str}",
+                            ha='center', fontsize=9, color='#CCCCCC')
 
         # Game state
-        gs_text = self.sim.game_state.value
-        gs_color = '#00FF00' if self.sim.game_state == GameState.PLAYING else '#FFD700'
-        self.ax_status.text(0.5, 0.79, gs_text, ha='center', fontsize=10,
+        gs_text = sim.game_state.value
+        gs_color = '#00FF00' if sim.game_state == GameState.PLAYING else '#FFD700'
+        self.ax_status.text(0.5, 0.82, gs_text, ha='center', fontsize=9,
                             fontweight='bold', color=gs_color)
 
-        # Profiles
-        self.ax_status.text(0.5, 0.74, f"Blue: {self.sim.blue_profile.name.upper()}", ha='center',
-                            fontsize=9, color='#6699FF')
-        self.ax_status.text(0.5, 0.70, f"Red: {self.sim.red_profile.name.upper()}", ha='center',
-                            fontsize=9, color='#FF6666')
+        # Tactical info
+        y = 0.77
+        bt = sim.blue_htsm.current_tactic
+        bt_color = TACTIC_COLORS.get(bt, '#FFFFFF')
+        self.ax_status.text(0.5, y,
+            f"BLUE ({sim.blue_personality.upper()})",
+            ha='center', fontsize=8, color='#6699FF', fontweight='bold')
+        y -= 0.03
+        self.ax_status.text(0.5, y, f"{bt.value}",
+            ha='center', fontsize=8, color=bt_color, fontfamily='monospace')
+        y -= 0.025
+        blue_form = compute_formation_label(sim.blue_robots, 1)
+        self.ax_status.text(0.5, y, f"Formation: {blue_form}",
+            ha='center', fontsize=7, color='#99AACC', fontfamily='monospace')
+
+        y -= 0.035
+        rt = sim.red_htsm.current_tactic
+        rt_color = TACTIC_COLORS.get(rt, '#FFFFFF')
+        self.ax_status.text(0.5, y,
+            f"RED ({sim.red_personality.upper()})",
+            ha='center', fontsize=8, color='#FF6666', fontweight='bold')
+        y -= 0.03
+        self.ax_status.text(0.5, y, f"{rt.value}",
+            ha='center', fontsize=8, color=rt_color, fontfamily='monospace')
+        y -= 0.025
+        red_form = compute_formation_label(sim.red_robots, -1)
+        self.ax_status.text(0.5, y, f"Formation: {red_form}",
+            ha='center', fontsize=7, color='#CCAA99', fontfamily='monospace')
+
+        # Possession
+        y -= 0.035
+        poss = sim.last_touch_team or '—'
+        poss_color = '#3366FF' if poss == 'blue' else '#FF3333' if poss == 'red' else '#808080'
+        self.ax_status.text(0.5, y, f"Possession: {poss.upper()}",
+                            ha='center', fontsize=8, color=poss_color)
 
         # Robot states
-        y_pos = 0.63
-        self.ax_status.text(0.5, y_pos, '─── BLUE TEAM ───', ha='center',
-                            fontsize=9, color='#3366FF')
-        y_pos -= 0.04
-        for robot in self.sim.blue_robots:
+        y -= 0.03
+        self.ax_status.text(0.5, y, '─── BLUE ───', ha='center', fontsize=8, color='#3366FF')
+        y -= 0.03
+        for robot in sim.blue_robots:
             state_color = STATE_COLORS.get(robot.state, '#808080')
             info = f"R{robot.id} [{robot.role.value}] {STATE_ABBREV.get(robot.state, '?')}"
-            self.ax_status.text(0.1, y_pos, info, ha='left', fontsize=8,
+            self.ax_status.text(0.08, y, info, ha='left', fontsize=7,
                                 color=state_color, fontfamily='monospace')
-            y_pos -= 0.035
+            y -= 0.028
 
-        y_pos -= 0.02
-        self.ax_status.text(0.5, y_pos, '─── RED TEAM ───', ha='center',
-                            fontsize=9, color='#FF3333')
-        y_pos -= 0.04
-        for robot in self.sim.red_robots:
+        y -= 0.015
+        self.ax_status.text(0.5, y, '─── RED ───', ha='center', fontsize=8, color='#FF3333')
+        y -= 0.03
+        for robot in sim.red_robots:
             state_color = STATE_COLORS.get(robot.state, '#808080')
             info = f"R{robot.id} [{robot.role.value}] {STATE_ABBREV.get(robot.state, '?')}"
-            self.ax_status.text(0.1, y_pos, info, ha='left', fontsize=8,
+            self.ax_status.text(0.08, y, info, ha='left', fontsize=7,
                                 color=state_color, fontfamily='monospace')
-            y_pos -= 0.035
+            y -= 0.028
 
-        # Pass stats
-        y_pos -= 0.03
-        self.ax_status.text(0.5, y_pos, f"Passes: B={self.sim.total_passes_blue}  R={self.sim.total_passes_red}",
-                            ha='center', fontsize=9, color='#AAAAAA')
+        # Stats
+        y -= 0.02
+        self.ax_status.text(0.5, y,
+            f"Passes  B:{sim.total_passes_blue}  R:{sim.total_passes_red}",
+            ha='center', fontsize=7, color='#AAAAAA', fontfamily='monospace')
+
+        # Event log
+        y -= 0.035
+        self.ax_status.text(0.5, y, '─── EVENTS ───', ha='center', fontsize=7, color='#888888')
+        y -= 0.025
+        for msg in sim.event_log[:4]:
+            self.ax_status.text(0.05, y, msg, ha='left', fontsize=6,
+                                color='#AAAAAA', fontfamily='monospace')
+            y -= 0.022
 
     def update(self, frame):
         self.ax_field.clear()
@@ -1173,13 +1289,6 @@ class Visualizer:
                                ha='center', va='center', color='white',
                                fontsize=7, fontweight='bold', zorder=5)
 
-            # State label above robot
-            abbrev = STATE_ABBREV.get(robot.state, '?')
-            self.ax_field.text(robot.x, robot.y + ROBOT_WIDTH / 2 + 0.12, abbrev,
-                               ha='center', va='bottom', color=state_color,
-                               fontsize=7, fontweight='bold', zorder=5,
-                               bbox=dict(boxstyle='round,pad=0.1',
-                                         facecolor='black', alpha=0.7))
 
         # Draw ball — real diameter 14 cm → radius 0.07 m
         BALL_RADIUS = 0.07   # metres
@@ -1201,11 +1310,10 @@ class Visualizer:
                                 head_width=0.15, head_length=0.1,
                                 fc='yellow', ec='orange', alpha=0.6, lw=1.5)
 
-        # Score bar at top
-        score_text = (f"BLUE ({self.sim.blue_profile.name.upper()}) "
-                      f"{self.sim.blue_goals} - {self.sim.red_goals} "
-                      f"({self.sim.red_profile.name.upper()}) RED  |  "
-                      f"{self.sim.get_elapsed_time_str()} / {self.sim.get_remaining_time_str()}  |  "
+        # Score bar at top — countdown only
+        remain_str = self.sim.get_remaining_time_str()
+        score_text = (f"Blue {self.sim.blue_goals}  -  {self.sim.red_goals} Red   |   "
+                      f"{remain_str}  |  "
                       f"{self.sim.game_state.value}")
         self.ax_field.text(0, PITCH_WIDTH / 2 + 0.5, score_text,
                            ha='center', fontsize=10, fontweight='bold', color='white')
@@ -1236,8 +1344,6 @@ class Visualizer:
         self._save_gif = save_gif
         self._gif_filename = gif_filename
         self._gif_params = {
-            'blue_profile': self.sim.blue_profile,
-            'red_profile': self.sim.red_profile,
             'enable_falls': self.sim.enable_falls,
             'match_duration': self.sim.match_duration,
         }
@@ -1247,7 +1353,7 @@ class Visualizer:
 
         max_frames = self.sim.match_duration_steps + 200
         anim = FuncAnimation(self.fig, self.update, frames=max_frames,
-                             interval=50, blit=False, repeat=False)
+                             interval=self.frame_interval, blit=False, repeat=False)
 
         # === Live window opens immediately ===
         plt.show()
@@ -1264,8 +1370,8 @@ class Visualizer:
         """
         if self._gif_filename is None:
             ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-            blue = self._gif_params['blue_profile'].name
-            red = self._gif_params['red_profile'].name
+            blue = self.sim.blue_personality
+            red = self.sim.red_personality
             self._gif_filename = f"sim3_{blue}_vs_{red}_{ts}.gif"
 
         output_dir = "animation_outputs"
@@ -1274,8 +1380,8 @@ class Visualizer:
 
         # Fresh simulator with same settings
         sim2 = SoccerSimulator(
-            blue_profile=self._gif_params['blue_profile'],
-            red_profile=self._gif_params['red_profile'],
+            blue_personality=self.sim.blue_personality,
+            red_personality=self.sim.red_personality,
             enable_falls=self._gif_params['enable_falls'],
             match_duration=self._gif_params['match_duration'],
             headless=True,
@@ -1320,24 +1426,21 @@ class Visualizer:
 
 def main():
     print("=" * 70)
-    print("Soccer Simulation VERSION 3 — Aggressive vs Conservative")
+    print("Soccer Simulation — Unified Tactical Architecture")
     print("=" * 70)
 
-    # Profile selection
-    print("\nSelect BLUE team profile:")
-    print("  1. Baseline (default behavior)")
-    print("  2. Aggressive (shoot-first, push forward)")
-    print("  3. Conservative (pass-first, stay deep)")
-    blue_choice = input("Choice (1-3, default=1): ").strip()
-    blue_profiles = {'1': 'baseline', '2': 'aggressive', '3': 'conservative'}
-    blue_name = blue_profiles.get(blue_choice, 'baseline')
+    # Personality selection
+    print("\nSelect BLUE team personality:")
+    print("  1. Aggressive (high-risk, early press, shoot-first)")
+    print("  2. Conservative (low-risk, hold shape, pass-first)")
+    blue_choice = input("Choice (1-2, default=1): ").strip()
+    blue_name = 'conservative' if blue_choice == '2' else 'aggressive'
 
-    print("\nSelect RED team profile:")
-    print("  1. Baseline")
-    print("  2. Aggressive")
-    print("  3. Conservative")
-    red_choice = input("Choice (1-3, default=1): ").strip()
-    red_name = blue_profiles.get(red_choice, 'baseline')
+    print("\nSelect RED team personality:")
+    print("  1. Aggressive")
+    print("  2. Conservative")
+    red_choice = input("Choice (1-2, default=2): ").strip()
+    red_name = 'aggressive' if red_choice == '1' else 'conservative'
 
     # Match duration
     dur_input = input("\nMatch duration in seconds (default=300 for 5 min): ").strip()
@@ -1350,23 +1453,39 @@ def main():
     fall_input = input("Enable fall simulation? (y/n, default=y): ").strip().lower()
     enable_falls = fall_input != 'n'
 
+    # Frame rate
+    print("\nFrame rate (ms between frames):")
+    print("    10 = fast (default, ~6x real-time)")
+    print("    50 = real-time (1 sim second ≈ 1 real second)")
+    print("   100 = slow motion")
+    fps_input = input("Frame interval in ms (default=10): ").strip()
+    try:
+        frame_interval = int(fps_input) if fps_input else 10
+        frame_interval = max(1, frame_interval)
+    except ValueError:
+        frame_interval = 10
+
     # Save GIF
     save_input = input("Save as GIF? (y/n, default=n): ").strip().lower()
     save_gif = save_input == 'y'
 
+    real_ratio = frame_interval / 50.0
     print(f"\n{'='*70}")
-    print(f"  Blue: {blue_name.upper()} vs Red: {red_name.upper()}")
+    print(f"  Blue: {blue_name.upper()} personality")
+    print(f"  Red:  {red_name.upper()} personality")
     print(f"  Duration: {duration}s ({duration//60}m {duration%60}s)")
     print(f"  Falls: {'ON' if enable_falls else 'OFF'}")
+    print(f"  Speed: {frame_interval}ms/frame ({real_ratio:.1f}x real-time)")
+    print(f"  Dynamic tactics: ON (HTSM with hysteresis)")
     print(f"{'='*70}\n")
 
     sim = SoccerSimulator(
-        blue_profile=blue_name,
-        red_profile=red_name,
+        blue_personality=blue_name,
+        red_personality=red_name,
         enable_falls=enable_falls,
         match_duration=duration,
     )
-    viz = Visualizer(sim)
+    viz = Visualizer(sim, frame_interval=frame_interval)
     viz.run(save_gif=save_gif)
 
 
@@ -1374,8 +1493,8 @@ if __name__ == "__main__":
     # Support command-line args for headless/automated use
     if '--headless' in sys.argv:
         # Parse args
-        blue = 'baseline'
-        red = 'baseline'
+        blue = 'aggressive'
+        red = 'conservative'
         duration = DEFAULT_MATCH_DURATION
         for i, arg in enumerate(sys.argv):
             if arg == '--blue' and i + 1 < len(sys.argv):
@@ -1385,7 +1504,7 @@ if __name__ == "__main__":
             elif arg == '--duration' and i + 1 < len(sys.argv):
                 duration = int(sys.argv[i + 1])
 
-        sim = SoccerSimulator(blue_profile=blue, red_profile=red,
+        sim = SoccerSimulator(blue_personality=blue, red_personality=red,
                               match_duration=duration, headless=True)
         result = sim.run_headless()
         print(json.dumps(result, indent=2))
