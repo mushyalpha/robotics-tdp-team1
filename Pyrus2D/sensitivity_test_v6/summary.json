@@ -1,0 +1,155 @@
+{
+  "chase_radius": {
+    "sweep_values": [
+      1.3,
+      2.0,
+      2.5,
+      3.0,
+      3.5
+    ],
+    "results": [
+      {
+        "win_rate": 0.0,
+        "possession": 61.6,
+        "goal_difference": 0.0,
+        "territory_gain": 19.5,
+        "centroid_x": -0.534,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 79.2,
+        "goal_difference": 0.0,
+        "territory_gain": 59.2,
+        "centroid_x": 0.019,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 80.0,
+        "goal_difference": 0.0,
+        "territory_gain": 59.4,
+        "centroid_x": 0.191,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 79.8,
+        "goal_difference": 0.0,
+        "territory_gain": 59.2,
+        "centroid_x": 0.214,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 20.0,
+        "possession": 82.9,
+        "goal_difference": 0.2,
+        "territory_gain": 68.2,
+        "centroid_x": 0.164,
+        "n_matches": 5
+      }
+    ]
+  },
+  "kick_power": {
+    "sweep_values": [
+      0.85,
+      0.95,
+      1.05,
+      1.15,
+      1.25
+    ],
+    "results": [
+      {
+        "win_rate": 0.0,
+        "possession": 78.9,
+        "goal_difference": 0.0,
+        "territory_gain": 58.9,
+        "centroid_x": 0.247,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 96.5,
+        "goal_difference": 0.0,
+        "territory_gain": 98.1,
+        "centroid_x": 0.662,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 78.1,
+        "goal_difference": 0.0,
+        "territory_gain": 58.8,
+        "centroid_x": 0.126,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 60.2,
+        "goal_difference": 0.0,
+        "territory_gain": 19.8,
+        "centroid_x": -0.418,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 78.1,
+        "goal_difference": 0.0,
+        "territory_gain": 57.4,
+        "centroid_x": 0.181,
+        "n_matches": 5
+      }
+    ]
+  },
+  "shoot_distance_max": {
+    "sweep_values": [
+      1.0,
+      1.4,
+      1.8,
+      2.2,
+      2.8
+    ],
+    "results": [
+      {
+        "win_rate": 0.0,
+        "possession": 79.5,
+        "goal_difference": 0.0,
+        "territory_gain": 59.2,
+        "centroid_x": 0.366,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 96.5,
+        "goal_difference": 0.0,
+        "territory_gain": 98.3,
+        "centroid_x": 0.781,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 96.5,
+        "goal_difference": 0.0,
+        "territory_gain": 98.2,
+        "centroid_x": 0.638,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 60.7,
+        "goal_difference": 0.0,
+        "territory_gain": 19.6,
+        "centroid_x": -0.493,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 60.8,
+        "goal_difference": 0.0,
+        "territory_gain": 20.7,
+        "centroid_x": -0.354,
+        "n_matches": 5
+      }
+    ]
+  }
+}

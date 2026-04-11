@@ -417,7 +417,8 @@ class Ball:
 class SoccerSimulator:
     def __init__(self, blue_personality='aggressive', red_personality='conservative',
                  enable_falls=True, match_duration=DEFAULT_MATCH_DURATION,
-                 headless=False):
+                 headless=False, static_profile=None,
+                 blue_static_profile=None, red_static_profile=None):
         """
         Args:
             blue_personality: 'aggressive' or 'conservative' — sets HTSM switching table
@@ -425,18 +426,37 @@ class SoccerSimulator:
             enable_falls: Toggle fall simulation
             match_duration: Match length in seconds
             headless: If True, skip all print output
+            static_profile: If provided (a BehaviorProfile), both teams use this
+                            fixed profile for the entire match. HTSM dynamic
+                            tactical switching is disabled entirely.
+            blue_static_profile: Override for blue team only (takes priority over static_profile)
+            red_static_profile:  Override for red team only (takes priority over static_profile)
         """
         self.headless = headless
 
-        # --- Tactical State Machines (one per team) ---
-        self.blue_personality = blue_personality
-        self.red_personality = red_personality
-        self.blue_htsm = TacticalStateMachine(blue_personality)
-        self.red_htsm = TacticalStateMachine(red_personality)
+        # Resolve per-team static profiles
+        blue_sp = blue_static_profile or static_profile
+        red_sp = red_static_profile or static_profile
+        self.static_profile = blue_sp or red_sp  # truthy if either team is static
 
-        # Live profiles — updated every step by the HTSM's current α
-        self.blue_profile = self.blue_htsm.get_profile()
-        self.red_profile = self.red_htsm.get_profile()
+        if blue_sp is not None or red_sp is not None:
+            # --- Static mode: no dynamic tactics ---
+            self.blue_personality = 'static'
+            self.red_personality = 'static'
+            self.blue_htsm = None
+            self.red_htsm = None
+            # Fall back to BASELINE if only one side was specified
+            from behavior_profile import BASELINE as _BASELINE
+            self.blue_profile = blue_sp if blue_sp is not None else _BASELINE
+            self.red_profile = red_sp if red_sp is not None else _BASELINE
+        else:
+            # --- Dynamic mode: HTSM tactical switching ---
+            self.blue_personality = blue_personality
+            self.red_personality = red_personality
+            self.blue_htsm = TacticalStateMachine(blue_personality)
+            self.red_htsm = TacticalStateMachine(red_personality)
+            self.blue_profile = self.blue_htsm.get_profile()
+            self.red_profile = self.red_htsm.get_profile()
 
         # Ball
         self.ball = Ball(0, 0)
@@ -554,8 +574,10 @@ class SoccerSimulator:
             self.last_touch_team = 'blue'
             if not self.headless:
                 print(f"\n⚽ GOAL! Blue scores! (Blue {self.blue_goals} - {self.red_goals} Red)")
-            self.blue_htsm.reset_lock_on_goal()
-            self.red_htsm.reset_lock_on_goal()
+            if self.blue_htsm is not None:
+                self.blue_htsm.reset_lock_on_goal()
+            if self.red_htsm is not None:
+                self.red_htsm.reset_lock_on_goal()
             self._add_event(f"⚽ BLUE GOAL ({self.blue_goals}-{self.red_goals})")
             self._start_trackback('red')  # Red gets kick-off
             return True
@@ -566,8 +588,10 @@ class SoccerSimulator:
             self.last_touch_team = 'red'
             if not self.headless:
                 print(f"\n⚽ GOAL! Red scores! (Blue {self.blue_goals} - {self.red_goals} Red)")
-            self.blue_htsm.reset_lock_on_goal()
-            self.red_htsm.reset_lock_on_goal()
+            if self.blue_htsm is not None:
+                self.blue_htsm.reset_lock_on_goal()
+            if self.red_htsm is not None:
+                self.red_htsm.reset_lock_on_goal()
             self._add_event(f"⚽ RED GOAL ({self.blue_goals}-{self.red_goals})")
             self._start_trackback('blue')  # Blue gets kick-off
             return True
@@ -808,6 +832,15 @@ class SoccerSimulator:
             # Clamp to pitch
             robot.x = np.clip(robot.x, -PITCH_LENGTH / 2 + 0.1, PITCH_LENGTH / 2 - 0.1)
             robot.y = np.clip(robot.y, -PITCH_WIDTH / 2 + 0.1, PITCH_WIDTH / 2 - 0.1)
+            # === Dribble: ball follows when robot has possession ===
+            ball_dist = robot.get_distance_to({'x': self.ball.x, 'y': self.ball.y})
+            if ball_dist <= 0.3:
+                # Place ball slightly ahead of robot in facing direction
+                self.ball.x = robot.x + 0.15 * np.cos(robot.heading)
+                self.ball.y = robot.y + 0.15 * np.sin(robot.heading)
+                self.ball.vx = 0.0  # Ball moves with robot, no free velocity
+                self.ball.vy = 0.0
+                self.last_touch_team = robot.team
 
         elif action == 'kick':
             # Robot must be close to ball and approach from behind it
@@ -926,7 +959,9 @@ class SoccerSimulator:
         # --- PLAYING STATE ---
 
         # HTSM update: evaluate tactics, drift alpha, generate profiles
-        self._update_tactics()
+        # (skipped in static_profile mode)
+        if self.static_profile is None:
+            self._update_tactics()
 
         # Update falls
         if self.enable_falls:

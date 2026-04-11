@@ -29,6 +29,8 @@ class MetricsCollector:
         self.red_possession_steps = 0
         self.blue_shots = 0
         self.red_shots = 0
+        self.blue_shots_on_target = 0   # Shot where ball travels toward opponent goal
+        self.red_shots_on_target = 0
         self.blue_danger_zone_steps = 0   # Ball in opponent third
         self.red_danger_zone_steps = 0
         self.blue_falls = 0
@@ -36,6 +38,11 @@ class MetricsCollector:
         self.blue_distance = {i: 0.0 for i in range(1, 5)}  # Per-player distance
         self.red_distance = {i: 0.0 for i in range(5, 9)}
         self.prev_positions = {}  # For distance tracking
+
+        # Team centroid X (average outfield player X position)
+        self.blue_centroid_x_sum = 0.0
+        self.red_centroid_x_sum = 0.0
+        self.centroid_steps = 0
 
     def record_step(self):
         """Record metrics for the current simulation step."""
@@ -84,12 +91,28 @@ class MetricsCollector:
                     self.red_falls += 1
 
         # Shots tracking (kick actions toward goal)
+        # Shots on target: ball velocity points toward opponent's goal at moment of kick
         for robot in sim.robots:
             if robot.state.value == "KICKING" and robot.state_duration == 0:
                 if robot.team == 'blue':
                     self.blue_shots += 1
+                    if sim.ball.vx > 0:   # Ball heading toward red goal (+X)
+                        self.blue_shots_on_target += 1
                 else:
                     self.red_shots += 1
+                    if sim.ball.vx < 0:   # Ball heading toward blue goal (-X)
+                        self.red_shots_on_target += 1
+
+        # Team centroid X (outfield players only)
+        blue_outfield = [r for r in sim.blue_robots
+                         if r.role.name != 'GOALKEEPER']
+        red_outfield = [r for r in sim.red_robots
+                        if r.role.name != 'GOALKEEPER']
+        if blue_outfield:
+            self.blue_centroid_x_sum += np.mean([r.x for r in blue_outfield])
+        if red_outfield:
+            self.red_centroid_x_sum += np.mean([r.x for r in red_outfield])
+        self.centroid_steps += 1
 
     def record_event(self, event_type, details=None):
         """Record a discrete event (goal, set piece, etc.)."""
@@ -123,6 +146,8 @@ class MetricsCollector:
             # Offense
             'blue_shots': self.blue_shots,
             'red_shots': self.red_shots,
+            'blue_shots_on_target': self.blue_shots_on_target,
+            'red_shots_on_target': self.red_shots_on_target,
             'blue_passes': sim.total_passes_blue,
             'red_passes': sim.total_passes_red,
 
@@ -139,6 +164,10 @@ class MetricsCollector:
             # Per-player distances
             'blue_distance_per_player': {str(k): round(v, 1) for k, v in self.blue_distance.items()},
             'red_distance_per_player': {str(k): round(v, 1) for k, v in self.red_distance.items()},
+
+            # Team centroid X (average outfield player X over the match)
+            'blue_avg_centroid_x': round(self.blue_centroid_x_sum / max(1, self.centroid_steps), 3),
+            'red_avg_centroid_x': round(self.red_centroid_x_sum / max(1, self.centroid_steps), 3),
         }
 
         return summary

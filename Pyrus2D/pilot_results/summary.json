@@ -1,0 +1,185 @@
+{
+  "shoot_distance_max": {
+    "sweep_values": [
+      1.0,
+      1.4,
+      1.8,
+      2.2,
+      2.8
+    ],
+    "results": [
+      {
+        "win_rate": 80.0,
+        "possession": 45.7,
+        "goal_difference": 1.4,
+        "territory_gain": -18.1,
+        "centroid_x": -0.649,
+        "total_shots": 1293.0,
+        "shots_on_target": 115.2,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 40.0,
+        "possession": 53.0,
+        "goal_difference": 0.4,
+        "territory_gain": -0.2,
+        "centroid_x": -0.303,
+        "total_shots": 1743.4,
+        "shots_on_target": 151.4,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 40.0,
+        "possession": 52.9,
+        "goal_difference": 0.6,
+        "territory_gain": 7.2,
+        "centroid_x": 0.037,
+        "total_shots": 2215.8,
+        "shots_on_target": 202.8,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 60.0,
+        "possession": 47.3,
+        "goal_difference": 0.4,
+        "territory_gain": -8.7,
+        "centroid_x": -0.195,
+        "total_shots": 2327.4,
+        "shots_on_target": 296.0,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 33.8,
+        "goal_difference": -0.8,
+        "territory_gain": -48.6,
+        "centroid_x": -1.09,
+        "total_shots": 990.2,
+        "shots_on_target": 150.8,
+        "n_matches": 5
+      }
+    ]
+  },
+  "shoot_over_pass_bias": {
+    "sweep_values": [
+      0.1,
+      0.3,
+      0.5,
+      0.7,
+      0.9
+    ],
+    "results": [
+      {
+        "win_rate": 40.0,
+        "possession": 50.5,
+        "goal_difference": 0.2,
+        "territory_gain": 3.4,
+        "centroid_x": -0.286,
+        "total_shots": 2039.8,
+        "shots_on_target": 185.2,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 43.5,
+        "goal_difference": -1.0,
+        "territory_gain": -22.4,
+        "centroid_x": -0.552,
+        "total_shots": 1228.4,
+        "shots_on_target": 100.0,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 0.0,
+        "possession": 41.5,
+        "goal_difference": -0.2,
+        "territory_gain": -19.4,
+        "centroid_x": -0.552,
+        "total_shots": 1591.0,
+        "shots_on_target": 194.0,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 20.0,
+        "possession": 43.5,
+        "goal_difference": 0.2,
+        "territory_gain": -20.0,
+        "centroid_x": -0.595,
+        "total_shots": 1506.2,
+        "shots_on_target": 176.0,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 60.0,
+        "possession": 56.8,
+        "goal_difference": 0.8,
+        "territory_gain": 19.5,
+        "centroid_x": 0.164,
+        "total_shots": 2269.8,
+        "shots_on_target": 143.4,
+        "n_matches": 5
+      }
+    ]
+  },
+  "chase_radius": {
+    "sweep_values": [
+      1.3,
+      2.0,
+      2.5,
+      3.0,
+      3.5
+    ],
+    "results": [
+      {
+        "win_rate": 20.0,
+        "possession": 36.2,
+        "goal_difference": -0.2,
+        "territory_gain": -38.1,
+        "centroid_x": -0.602,
+        "total_shots": 942.4,
+        "shots_on_target": 175.8,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 20.0,
+        "possession": 45.1,
+        "goal_difference": -0.6,
+        "territory_gain": -17.4,
+        "centroid_x": -0.408,
+        "total_shots": 1636.6,
+        "shots_on_target": 158.6,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 40.0,
+        "possession": 56.3,
+        "goal_difference": 0.0,
+        "territory_gain": 10.3,
+        "centroid_x": -0.039,
+        "total_shots": 1981.6,
+        "shots_on_target": 146.0,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 40.0,
+        "possession": 60.0,
+        "goal_difference": 0.0,
+        "territory_gain": 31.2,
+        "centroid_x": 0.156,
+        "total_shots": 2663.4,
+        "shots_on_target": 222.0,
+        "n_matches": 5
+      },
+      {
+        "win_rate": 60.0,
+        "possession": 50.6,
+        "goal_difference": 0.8,
+        "territory_gain": -2.2,
+        "centroid_x": -0.213,
+        "total_shots": 2090.0,
+        "shots_on_target": 238.6,
+        "n_matches": 5
+      }
+    ]
+  }
+}

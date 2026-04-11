@@ -89,24 +89,32 @@ def _decide_with_ball(sim, robot, profile, attack_direction, teammates):
     pass_count = getattr(sim, 'pass_count', 0)
     met_min_passes = pass_count >= profile.min_passes_before_shot
     
-    # Shoot-or-pass decision
-    wants_to_shoot = np.random.random() < profile.shoot_over_pass_bias
+    # --- PRIORITY 1: Shoot if in range and conditions met ---
+    if in_shooting_range and good_angle and met_min_passes:
+        # Use shoot_over_pass_bias as probability of shooting vs passing
+        if np.random.random() < profile.shoot_over_pass_bias:
+            if hasattr(robot, 'set_state'):
+                from simple_soccer_sim3 import RobotState
+                robot.set_state(RobotState.KICKING)
+            sim.pass_count = 0
+            sim.last_passer_id = None
+            return 'kick'
     
-    if in_shooting_range and good_angle and met_min_passes and wants_to_shoot:
-        # SHOOT!
-        if hasattr(robot, 'set_state'):
-            from simple_soccer_sim3 import RobotState
-            robot.set_state(RobotState.KICKING)
-        sim.pass_count = 0
-        sim.last_passer_id = None
-        return 'kick'
+    # --- Determine if we should dribble forward or pass ---
+    # On opponent's half, prefer dribbling toward goal over passing
+    on_opponent_half = (robot.x * attack_direction) > 0
     
     # --- Find best pass target ---
     best_pass_target, best_pass_score = _find_best_pass(
         sim, robot, teammates, profile, attack_direction
     )
     
-    if best_pass_target is not None and best_pass_score > 0.5:
+    # Raise the pass acceptance threshold when on opponent's half
+    # so the robot prefers to dribble toward goal instead of
+    # passing backward endlessly
+    pass_threshold = 3.0 if on_opponent_half else 0.5
+    
+    if best_pass_target is not None and best_pass_score > pass_threshold:
         # PASS
         if hasattr(robot, 'set_state'):
             from simple_soccer_sim3 import RobotState

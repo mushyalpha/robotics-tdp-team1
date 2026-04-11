@@ -1,0 +1,13 @@
+{
+    "win_rate_blue": 0.99,
+    "draw_rate": 0.01,
+    "loss_rate_red": 0.0,
+    "avg_goals_blue": 4.36,
+    "avg_goals_red": 0.07,
+    "avg_possession_blue": 50.0,
+    "avg_possession_red": 50.0,
+    "avg_total_shots": 0.0,
+    "avg_shots_on_target": 0.0,
+    "conversion_rate": 0,
+    "time_taken_seconds": 654.9290895462036
+}
