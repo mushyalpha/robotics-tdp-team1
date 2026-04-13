@@ -999,9 +999,7 @@ class SoccerSimulator:
 
         self.time += 1
 
-    # -----------------------------------------------------------------
     # TACTICAL ENGINE INTEGRATION
-    # -----------------------------------------------------------------
 
     def _update_tactics(self):
         """Update both teams' HTSM — evaluate switching rules, drift α."""
